@@ -22,9 +22,20 @@ export function useApi<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
+  // Silent refetch: updates data without showing loading state (preserves scroll)
+  const silentRefetch = useCallback(async () => {
+    try {
+      const result = await fetcher();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "שגיאה לא צפויה");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+
   useEffect(() => {
     refetch();
   }, [refetch]);
 
-  return { data, error, isLoading, refetch };
+  return { data, error, isLoading, refetch, silentRefetch };
 }

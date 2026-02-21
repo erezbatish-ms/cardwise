@@ -37,7 +37,7 @@ export function TransactionList() {
 
   const { data: cards } = useApi(() => api.getCards(), []);
   const { data: categories, refetch: refetchCats } = useApi(() => api.getCategories(), []);
-  const { data, isLoading, refetch } = useApi(
+  const { data, isLoading, refetch, silentRefetch } = useApi(
     () =>
       api.getTransactions({
         ...(cardId ? { cardId } : {}),
@@ -55,7 +55,7 @@ export function TransactionList() {
   async function handleCategoryChange(txnId: string, categoryId: string) {
     await api.updateCategory(txnId, categoryId);
     setEditingTxn(null);
-    refetch();
+    silentRefetch();
   }
 
   async function handleAutoCategorize() {

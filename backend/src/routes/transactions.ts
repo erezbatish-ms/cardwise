@@ -63,6 +63,7 @@ transactionsRouter.put("/:id/category", async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const { categoryId } = req.body;
 
+    // Update the single transaction
     const updated = await prisma.transaction.update({
       where: { id },
       data: {
@@ -72,7 +73,24 @@ transactionsRouter.put("/:id/category", async (req: Request, res: Response) => {
       include: { category: true },
     });
 
-    res.json(updated);
+    // Also update all other transactions from the same merchant (non-manual)
+    let merchantUpdated = 0;
+    if (updated.merchant) {
+      const result = await prisma.transaction.updateMany({
+        where: {
+          merchant: updated.merchant,
+          id: { not: id },
+          categorySource: { not: "manual" },
+        },
+        data: {
+          categoryId,
+          categorySource: "manual",
+        },
+      });
+      merchantUpdated = result.count;
+    }
+
+    res.json({ ...updated, merchantUpdated });
   } catch (err) {
     console.error("Category update error:", err);
     res.status(500).json({ error: "שגיאה בעדכון קטגוריה" });

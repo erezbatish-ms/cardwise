@@ -97,4 +97,38 @@ test.describe("לוח בקרה — Dashboard", () => {
   }) => {
     await expect(page.getByText("נדרשים לפחות 2 כרטיסים")).toBeVisible();
   });
+
+  test("should show transaction drill-down when clicking category legend", async ({ page }) => {
+    // Mock transactions for drill-down
+    await page.route("**/api/transactions*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          transactions: [
+            {
+              id: "txn-1", date: "2025-10-01", description: "מסעדת טעם", chargedAmount: -120,
+              originalAmount: -120, currency: "ILS", categoryId: "cat-1", categorySource: "ai",
+              merchant: "מסעדת טעם",
+              card: { id: "c1", lastFourDigits: "1234", cardName: null, provider: "isracard" },
+              category: { id: "cat-1", name: "מזון ומסעדות", icon: "🍽️", color: "#ef4444", isDefault: true },
+            },
+          ],
+          pagination: { page: 1, limit: 100, total: 1, pages: 1 },
+        }),
+      });
+    });
+
+    // Click the first legend item (מזון ומסעדות)
+    const legendButtons = page.locator("button").filter({ hasText: "מזון ומסעדות" });
+    await legendButtons.first().click();
+
+    // Should show drill-down panel with transactions
+    await expect(page.getByText("עסקאות בקטגוריה:")).toBeVisible();
+    await expect(page.getByText("מסעדת טעם")).toBeVisible();
+
+    // Close the drill-down
+    await page.getByRole("button", { name: /סגור/ }).click();
+    await expect(page.getByText("עסקאות בקטגוריה:")).not.toBeVisible();
+  });
 });
