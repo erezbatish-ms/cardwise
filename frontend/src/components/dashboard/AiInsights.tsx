@@ -1,14 +1,14 @@
 import { api, type Insight } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
 
-export function AiInsights() {
+export function AiInsights({ period }: { period?: string }) {
   const { data, isLoading, error, refetch } = useApi(
-    () => api.getInsights(),
-    []
+    () => api.getInsights(undefined, period),
+    [period]
   );
 
   async function handleRefresh() {
-    await api.refreshInsights();
+    await api.refreshInsights(undefined, period);
     refetch();
   }
 

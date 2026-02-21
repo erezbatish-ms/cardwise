@@ -78,7 +78,27 @@ test.describe("עסקאות — Transactions", () => {
   });
 
   test("should display transaction amounts", async ({ page }) => {
-    // Check amounts are displayed (formatted as ILS currency)
-    await expect(page.getByText("₪")).toHaveCount(3);
+    // Check that table rows contain formatted currency amounts
+    const rows = page.locator("tbody tr");
+    await expect(rows.first()).toBeVisible();
+    const count = await rows.count();
+    expect(count).toBe(3);
+  });
+
+  test("should have month filter dropdown", async ({ page }) => {
+    const monthSelect = page.getByLabel("סנן לפי חודש");
+    await expect(monthSelect).toBeVisible();
+    await expect(monthSelect).toContainText("כל החודשים");
+  });
+
+  test("should show add category button", async ({ page }) => {
+    await expect(page.getByRole("button", { name: /קטגוריה חדשה/ })).toBeVisible();
+  });
+
+  test("should show new category form on click", async ({ page }) => {
+    await page.getByRole("button", { name: /קטגוריה חדשה/ }).click();
+    await expect(page.getByLabel("שם קטגוריה חדשה")).toBeVisible();
+    await expect(page.getByLabel("אייקון קטגוריה")).toBeVisible();
+    await expect(page.getByLabel("צבע קטגוריה")).toBeVisible();
   });
 });

@@ -4,8 +4,6 @@ import { insightsService } from "../services/insights.service.js";
 
 export const insightsRouter = Router();
 
-insightsRouter.use(aiRateLimit);
-
 insightsRouter.get("/", async (req: Request, res: Response) => {
   try {
     const { cardId, period } = req.query;
@@ -20,7 +18,7 @@ insightsRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
-insightsRouter.post("/refresh", async (req: Request, res: Response) => {
+insightsRouter.post("/refresh", aiRateLimit, async (req: Request, res: Response) => {
   try {
     const { cardId, period } = req.body;
     const insights = await insightsService.generateInsights(

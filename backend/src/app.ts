@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: process.env.NODE_ENV === "production" ? 100 : 1000,
+    max: process.env.NODE_ENV === "production" ? 100 : 10000,
     standardHeaders: true,
     legacyHeaders: false,
   })

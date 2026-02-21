@@ -11,8 +11,8 @@ import { api } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
 import { formatCurrency } from "../../lib/utils";
 
-export function CardComparison() {
-  const { data, isLoading, error } = useApi(() => api.getCardComparison(), []);
+export function CardComparison({ startDate, endDate }: { startDate?: string; endDate?: string }) {
+  const { data, isLoading, error } = useApi(() => api.getCardComparison(startDate, endDate), [startDate, endDate]);
 
   if (isLoading) {
     return (

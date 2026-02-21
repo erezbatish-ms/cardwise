@@ -40,8 +40,10 @@ test.describe("נגישות — Accessibility & RTL", () => {
 
   test("should support keyboard navigation in sidebar", async ({ page }) => {
     await login(page);
-    // Check sidebar navigation links exist
+    // Wait for sidebar to be visible
+    await page.waitForSelector("nav", { timeout: 5000 });
     const sidebarLinks = page.locator("nav").getByRole("link");
+    await expect(sidebarLinks.first()).toBeVisible({ timeout: 5000 });
     const count = await sidebarLinks.count();
     expect(count).toBeGreaterThanOrEqual(3);
   });

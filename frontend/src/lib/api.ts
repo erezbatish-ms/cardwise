@@ -100,14 +100,20 @@ export const api = {
     if (endDate) params.set("endDate", endDate);
     return fetchApi<CategoryBreakdown[]>(`/analytics/categories?${params}`);
   },
-  getTopMerchants: (cardId?: string, limit?: number) => {
+  getTopMerchants: (cardId?: string, limit?: number, startDate?: string, endDate?: string) => {
     const params = new URLSearchParams();
     if (cardId) params.set("cardId", cardId);
     if (limit) params.set("limit", String(limit));
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
     return fetchApi<MerchantSummary[]>(`/analytics/merchants?${params}`);
   },
-  getCardComparison: () =>
-    fetchApi<CardComparisonItem[]>("/analytics/comparison"),
+  getCardComparison: (startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams();
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
+    return fetchApi<CardComparisonItem[]>(`/analytics/comparison?${params}`);
+  },
 
   // Insights
   getInsights: (cardId?: string, period?: string) => {

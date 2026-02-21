@@ -2,10 +2,15 @@ import { api } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
 import { formatCurrency } from "../../lib/utils";
 
-export function TopMerchants() {
+interface Props {
+  startDate?: string;
+  endDate?: string;
+}
+
+export function TopMerchants({ startDate, endDate }: Props) {
   const { data, isLoading, error } = useApi(
-    () => api.getTopMerchants(undefined, 10),
-    []
+    () => api.getTopMerchants(undefined, 10, startDate, endDate),
+    [startDate, endDate]
   );
 
   if (isLoading) {

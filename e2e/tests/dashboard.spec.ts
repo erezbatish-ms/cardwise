@@ -43,7 +43,7 @@ test.describe("לוח בקרה — Dashboard", () => {
       });
     });
 
-    await page.route("**/api/analytics/comparison", async (route) => {
+    await page.route("**/api/analytics/comparison*", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -67,6 +67,19 @@ test.describe("לוח בקרה — Dashboard", () => {
     await expect(page.getByText("מגמות הוצאות")).toBeVisible();
     await expect(page.getByText("פילוח לפי קטגוריות")).toBeVisible();
     await expect(page.getByText("בתי עסק מובילים")).toBeVisible();
+  });
+
+  test("should have month filter dropdown", async ({ page }) => {
+    const monthSelect = page.getByLabel("סנן לפי חודש");
+    await expect(monthSelect).toBeVisible();
+    await expect(monthSelect).toContainText("כל התקופה");
+  });
+
+  test("should display category legend instead of pie labels", async ({ page }) => {
+    // Legend items should have colored dots with category names
+    const legend = page.locator(".rounded-full");
+    await expect(legend.first()).toBeVisible();
+    expect(await legend.count()).toBeGreaterThanOrEqual(2);
   });
 
   test("should display top merchants", async ({ page }) => {

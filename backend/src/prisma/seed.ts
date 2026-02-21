@@ -18,6 +18,7 @@ const DEFAULT_CATEGORIES = [
   { name: "מתנות", icon: "🎁", color: "#ec4899" },
   { name: "נסיעות וחופשות", icon: "✈️", color: "#f43f5e" },
   { name: "ריהוט ואלקטרוניקה", icon: "🖥️", color: "#78716c" },
+  { name: "טיפוח ויופי", icon: "💅", color: "#f472b6" },
   { name: "שונות", icon: "📌", color: "#94a3b8" },
 ];
 

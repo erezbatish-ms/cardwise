@@ -117,11 +117,21 @@ class AnalyticsService {
 
   async getTopMerchants(
     cardId?: string,
-    limit: number = 10
+    limit: number = 10,
+    startDate?: Date,
+    endDate?: Date
   ): Promise<MerchantSummary[]> {
     const where: Prisma.TransactionWhereInput = {
       merchant: { not: null },
       ...(cardId ? { cardId } : {}),
+      ...(startDate || endDate
+        ? {
+            date: {
+              ...(startDate ? { gte: startDate } : {}),
+              ...(endDate ? { lte: endDate } : {}),
+            },
+          }
+        : {}),
     };
 
     const results = await prisma.transaction.groupBy({
@@ -140,10 +150,23 @@ class AnalyticsService {
     }));
   }
 
-  async getCardComparison(): Promise<CardComparisonItem[]> {
+  async getCardComparison(
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<CardComparisonItem[]> {
+    const dateFilter = startDate || endDate
+      ? {
+          date: {
+            ...(startDate ? { gte: startDate } : {}),
+            ...(endDate ? { lte: endDate } : {}),
+          },
+        }
+      : {};
+
     const cards = await prisma.card.findMany({
       include: {
         transactions: {
+          where: dateFilter,
           select: { chargedAmount: true },
         },
       },

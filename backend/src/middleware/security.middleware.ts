@@ -12,7 +12,7 @@ export const scrapeRateLimit = rateLimit({
 // Rate limit for AI endpoints
 export const aiRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: process.env.NODE_ENV === "production" ? 30 : 60,
   message: { error: "יותר מדי בקשות AI — נסה שוב מאוחר יותר" },
   standardHeaders: true,
   legacyHeaders: false,

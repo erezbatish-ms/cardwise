@@ -85,7 +85,12 @@ transactionsRouter.post("/categorize", async (req: Request, res: Response) => {
       "../services/categorization.service.js"
     );
     const uncategorized = await prisma.transaction.findMany({
-      where: { categoryId: null },
+      where: {
+        OR: [
+          { categoryId: null },
+          { categorySource: "ai" },
+        ],
+      },
       select: { id: true, description: true, chargedAmount: true, merchant: true },
     });
 

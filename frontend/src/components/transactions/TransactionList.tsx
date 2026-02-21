@@ -1,25 +1,53 @@
 import { useState } from "react";
-import { api, type Transaction } from "../../lib/api";
+import { api, type Transaction, type Category } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
 import { formatCurrency, formatDate } from "../../lib/utils";
 import { CategoryEditor } from "./CategoryEditor";
 
+function getMonthOptions(): { value: string; label: string }[] {
+  const options: { value: string; label: string }[] = [{ value: "", label: "כל החודשים" }];
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const label = new Intl.DateTimeFormat("he-IL", { year: "numeric", month: "long" }).format(d);
+    options.push({ value, label });
+  }
+  return options;
+}
+
 export function TransactionList() {
   const [cardId, setCardId] = useState("");
   const [search, setSearch] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [page, setPage] = useState(1);
+  const [showNewCat, setShowNewCat] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
+  const [newCatIcon, setNewCatIcon] = useState("");
+  const [newCatColor, setNewCatColor] = useState("#6366f1");
+
+  // Compute date range from selected month
+  let startDate: string | undefined;
+  let endDate: string | undefined;
+  if (selectedMonth) {
+    const [y, m] = selectedMonth.split("-").map(Number);
+    startDate = new Date(y, m - 1, 1).toISOString();
+    endDate = new Date(y, m, 0, 23, 59, 59).toISOString();
+  }
 
   const { data: cards } = useApi(() => api.getCards(), []);
-  const { data: categories } = useApi(() => api.getCategories(), []);
+  const { data: categories, refetch: refetchCats } = useApi(() => api.getCategories(), []);
   const { data, isLoading, refetch } = useApi(
     () =>
       api.getTransactions({
         ...(cardId ? { cardId } : {}),
         ...(search ? { search } : {}),
+        ...(startDate ? { startDate } : {}),
+        ...(endDate ? { endDate } : {}),
         page: String(page),
         limit: "50",
       }),
-    [cardId, search, page]
+    [cardId, search, selectedMonth, page]
   );
 
   const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
@@ -35,20 +63,100 @@ export function TransactionList() {
     refetch();
   }
 
+  async function handleCreateCategory() {
+    if (!newCatName.trim()) return;
+    await api.createCategory(newCatName.trim(), newCatIcon || undefined, newCatColor);
+    setNewCatName("");
+    setNewCatIcon("");
+    setNewCatColor("#6366f1");
+    setShowNewCat(false);
+    refetchCats();
+  }
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold">עסקאות</h2>
-        <button
-          onClick={handleAutoCategorize}
-          className="rounded-md bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700"
-        >
-          🤖 סווג אוטומטית
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowNewCat(!showNewCat)}
+            className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+          >
+            ➕ קטגוריה חדשה
+          </button>
+          <button
+            onClick={handleAutoCategorize}
+            className="rounded-md bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700"
+          >
+            🤖 סווג אוטומטית
+          </button>
+        </div>
       </div>
+
+      {/* New Category Form */}
+      {showNewCat && (
+        <div className="mb-4 flex items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div>
+            <label className="mb-1 block text-xs text-gray-600">שם קטגוריה</label>
+            <input
+              type="text"
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              placeholder="למשל: חיות מחמד"
+              aria-label="שם קטגוריה חדשה"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-gray-600">אייקון</label>
+            <input
+              type="text"
+              value={newCatIcon}
+              onChange={(e) => setNewCatIcon(e.target.value)}
+              className="w-16 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              placeholder="🐾"
+              aria-label="אייקון קטגוריה"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-gray-600">צבע</label>
+            <input
+              type="color"
+              value={newCatColor}
+              onChange={(e) => setNewCatColor(e.target.value)}
+              className="h-8 w-10 cursor-pointer rounded border border-gray-300"
+              aria-label="צבע קטגוריה"
+            />
+          </div>
+          <button
+            onClick={handleCreateCategory}
+            disabled={!newCatName.trim()}
+            className="rounded-md bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            צור
+          </button>
+          <button
+            onClick={() => setShowNewCat(false)}
+            className="rounded-md border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+          >
+            ביטול
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="mb-4 flex gap-4">
+        <select
+          value={selectedMonth}
+          onChange={(e) => { setSelectedMonth(e.target.value); setPage(1); }}
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+          aria-label="סנן לפי חודש"
+        >
+          {getMonthOptions().map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+
         <select
           value={cardId}
           onChange={(e) => { setCardId(e.target.value); setPage(1); }}

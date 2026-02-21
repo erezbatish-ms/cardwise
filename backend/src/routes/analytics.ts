@@ -34,10 +34,12 @@ analyticsRouter.get("/categories", async (req: Request, res: Response) => {
 
 analyticsRouter.get("/merchants", async (req: Request, res: Response) => {
   try {
-    const { cardId, limit = "10" } = req.query;
+    const { cardId, limit = "10", startDate, endDate } = req.query;
     const merchants = await analyticsService.getTopMerchants(
       cardId as string | undefined,
-      Number(limit)
+      Number(limit),
+      startDate ? new Date(startDate as string) : undefined,
+      endDate ? new Date(endDate as string) : undefined
     );
     res.json(merchants);
   } catch (err) {
@@ -46,9 +48,13 @@ analyticsRouter.get("/merchants", async (req: Request, res: Response) => {
   }
 });
 
-analyticsRouter.get("/comparison", async (_req: Request, res: Response) => {
+analyticsRouter.get("/comparison", async (req: Request, res: Response) => {
   try {
-    const comparison = await analyticsService.getCardComparison();
+    const { startDate, endDate } = req.query;
+    const comparison = await analyticsService.getCardComparison(
+      startDate ? new Date(startDate as string) : undefined,
+      endDate ? new Date(endDate as string) : undefined
+    );
     res.json(comparison);
   } catch (err) {
     console.error("Comparison error:", err);
