@@ -9,6 +9,7 @@ import {
 import { api, type Transaction } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
 import { formatCurrency, formatDate } from "../../lib/utils";
+import { CategoryEditor } from "../transactions/CategoryEditor";
 
 interface Props {
   startDate?: string;
@@ -17,8 +18,9 @@ interface Props {
 
 export function CategoryBreakdown({ startDate, endDate }: Props) {
   const [selectedCat, setSelectedCat] = useState<{ id: string | null; name: string } | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const { data, isLoading, error } = useApi(
+  const { data, isLoading, error, silentRefetch: refreshChart } = useApi(
     () => api.getCategoryBreakdown(undefined, startDate, endDate),
     [startDate, endDate]
   );
@@ -129,7 +131,12 @@ export function CategoryBreakdown({ startDate, endDate }: Props) {
           categoryName={selectedCat.name}
           startDate={startDate}
           endDate={endDate}
+          refreshKey={refreshKey}
           onClose={() => setSelectedCat(null)}
+          onCategoryChanged={() => {
+            refreshChart();
+            setRefreshKey((k) => k + 1);
+          }}
         />
       )}
     </div>
@@ -141,15 +148,22 @@ function CategoryTransactions({
   categoryName,
   startDate,
   endDate,
+  refreshKey,
   onClose,
+  onCategoryChanged,
 }: {
   categoryId: string | null;
   categoryName: string;
   startDate?: string;
   endDate?: string;
+  refreshKey: number;
   onClose: () => void;
+  onCategoryChanged: () => void;
 }) {
-  const { data, isLoading } = useApi(
+  const [editingTxnId, setEditingTxnId] = useState<string | null>(null);
+
+  const { data: categories } = useApi(() => api.getCategories(), []);
+  const { data, isLoading, silentRefetch } = useApi(
     () =>
       api.getTransactions({
         ...(categoryId ? { categoryId } : {}),
@@ -157,8 +171,15 @@ function CategoryTransactions({
         ...(endDate ? { endDate } : {}),
         limit: "100",
       }),
-    [categoryId, startDate, endDate]
+    [categoryId, startDate, endDate, refreshKey]
   );
+
+  async function handleCategoryChange(txnId: string, newCategoryId: string) {
+    await api.updateCategory(txnId, newCategoryId);
+    setEditingTxnId(null);
+    silentRefetch();
+    onCategoryChanged();
+  }
 
   return (
     <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
@@ -183,6 +204,7 @@ function CategoryTransactions({
                 <th className="px-3 py-2 text-right font-medium text-gray-600">תאריך</th>
                 <th className="px-3 py-2 text-right font-medium text-gray-600">תיאור</th>
                 <th className="px-3 py-2 text-right font-medium text-gray-600">סכום</th>
+                <th className="px-3 py-2 text-right font-medium text-gray-600">קטגוריה</th>
                 <th className="px-3 py-2 text-right font-medium text-gray-600">כרטיס</th>
               </tr>
             </thead>
@@ -196,6 +218,28 @@ function CategoryTransactions({
                     {formatCurrency(Math.abs(txn.chargedAmount))}
                     {txn.chargedAmount > 0 && (
                       <span className="mr-1 rounded bg-green-100 px-1 text-xs text-green-700">זיכוי</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    {editingTxnId === txn.id ? (
+                      <CategoryEditor
+                        categories={categories || []}
+                        currentCategoryId={txn.categoryId}
+                        onSelect={(catId) => handleCategoryChange(txn.id, catId)}
+                        onCancel={() => setEditingTxnId(null)}
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setEditingTxnId(txn.id)}
+                        className="rounded px-2 py-1 text-xs hover:bg-gray-100"
+                        title="לחץ לשינוי קטגוריה"
+                      >
+                        {txn.category ? (
+                          <span>{txn.category.icon} {txn.category.name}</span>
+                        ) : (
+                          <span className="text-gray-400">לא מסווג</span>
+                        )}
+                      </button>
                     )}
                   </td>
                   <td className="px-3 py-2 text-gray-500">
