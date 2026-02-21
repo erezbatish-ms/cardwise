@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { api, type Transaction, type Category } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
+import { useSort, sortTransactions } from "../../hooks/useSort";
 import { formatCurrency, formatDate } from "../../lib/utils";
 import { CategoryEditor } from "./CategoryEditor";
+import { SortableHeader } from "../shared/SortableHeader";
 
 function getMonthOptions(): { value: string; label: string }[] {
   const options: { value: string; label: string }[] = [{ value: "", label: "כל החודשים" }];
@@ -51,6 +53,12 @@ export function TransactionList() {
   );
 
   const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
+  const { sortField, sortDir, toggleSort } = useSort("date", "desc");
+
+  const sortedTransactions = useMemo(
+    () => (data?.transactions ? sortTransactions(data.transactions, sortField, sortDir) : []),
+    [data?.transactions, sortField, sortDir]
+  );
 
   async function handleCategoryChange(txnId: string, categoryId: string) {
     const txn = data?.transactions.find((t) => t.id === txnId);
@@ -203,15 +211,15 @@ export function TransactionList() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">תאריך</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">תיאור</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">סכום</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">קטגוריה</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">כרטיס</th>
+                  <SortableHeader label="תאריך" field="date" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
+                  <SortableHeader label="תיאור" field="description" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
+                  <SortableHeader label="סכום" field="amount" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
+                  <SortableHeader label="קטגוריה" field="category" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
+                  <SortableHeader label="כרטיס" field="card" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {data?.transactions.map((txn) => (
+                {sortedTransactions.map((txn) => (
                   <tr key={txn.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap">{formatDate(txn.date)}</td>
                     <td className="px-4 py-3">{txn.description}</td>

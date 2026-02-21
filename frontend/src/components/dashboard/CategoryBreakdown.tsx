@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -8,8 +8,10 @@ import {
 } from "recharts";
 import { api, type Transaction } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
+import { useSort, sortTransactions } from "../../hooks/useSort";
 import { formatCurrency, formatDate } from "../../lib/utils";
 import { CategoryEditor } from "../transactions/CategoryEditor";
+import { SortableHeader } from "../shared/SortableHeader";
 
 interface Props {
   startDate?: string;
@@ -161,6 +163,7 @@ function CategoryTransactions({
   onCategoryChanged: () => void;
 }) {
   const [editingTxnId, setEditingTxnId] = useState<string | null>(null);
+  const { sortField, sortDir, toggleSort } = useSort("date", "desc");
 
   const { data: categories } = useApi(() => api.getCategories(), []);
   const { data, setData, isLoading, silentRefetch } = useApi(
@@ -172,6 +175,11 @@ function CategoryTransactions({
         limit: "100",
       }),
     [categoryId, startDate, endDate, refreshKey]
+  );
+
+  const sortedTransactions = useMemo(
+    () => (data?.transactions ? sortTransactions(data.transactions, sortField, sortDir) : []),
+    [data?.transactions, sortField, sortDir]
   );
 
   async function handleCategoryChange(txnId: string, newCategoryId: string) {
@@ -214,15 +222,15 @@ function CategoryTransactions({
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-gray-100">
               <tr>
-                <th className="px-3 py-2 text-right font-medium text-gray-600">תאריך</th>
-                <th className="px-3 py-2 text-right font-medium text-gray-600">תיאור</th>
-                <th className="px-3 py-2 text-right font-medium text-gray-600">סכום</th>
-                <th className="px-3 py-2 text-right font-medium text-gray-600">קטגוריה</th>
-                <th className="px-3 py-2 text-right font-medium text-gray-600">כרטיס</th>
+                <SortableHeader label="תאריך" field="date" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
+                <SortableHeader label="תיאור" field="description" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
+                <SortableHeader label="סכום" field="amount" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
+                <SortableHeader label="קטגוריה" field="category" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
+                <SortableHeader label="כרטיס" field="card" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {data?.transactions.map((txn) => (
+              {sortedTransactions.map((txn) => (
                 <tr key={txn.id} className="hover:bg-white">
                   <td className="px-3 py-2 whitespace-nowrap">{formatDate(txn.date)}</td>
                   <td className="px-3 py-2">{txn.description}</td>
