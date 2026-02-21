@@ -95,7 +95,7 @@ export function TransactionList() {
                     <td className="px-4 py-3 whitespace-nowrap">{formatDate(txn.date)}</td>
                     <td className="px-4 py-3">{txn.description}</td>
                     <td className="px-4 py-3 whitespace-nowrap font-medium">
-                      {formatCurrency(txn.chargedAmount)}
+                      {formatCurrency(Math.abs(txn.chargedAmount))}
                     </td>
                     <td className="px-4 py-3">
                       {editingTxn?.id === txn.id ? (
