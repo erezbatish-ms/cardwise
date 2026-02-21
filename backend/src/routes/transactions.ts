@@ -73,14 +73,13 @@ transactionsRouter.put("/:id/category", async (req: Request, res: Response) => {
       include: { category: true },
     });
 
-    // Also update all other transactions from the same merchant (non-manual)
+    // Also update all other transactions from the same merchant
     let merchantUpdated = 0;
     if (updated.merchant) {
       const result = await prisma.transaction.updateMany({
         where: {
           merchant: updated.merchant,
           id: { not: id },
-          categorySource: { not: "manual" },
         },
         data: {
           categoryId,
