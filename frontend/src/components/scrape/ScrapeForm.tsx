@@ -2,7 +2,8 @@ import { useState, FormEvent } from "react";
 import { api } from "../../lib/api";
 
 export function ScrapeForm() {
-  const [username, setUsername] = useState("");
+  const [idNumber, setIdNumber] = useState("");
+  const [card6Digits, setCard6Digits] = useState("");
   const [password, setPassword] = useState("");
   const [startDate, setStartDate] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -14,11 +15,12 @@ export function ScrapeForm() {
     setMessage("מתחבר לישראכרט ומושך נתונים... זה עשוי לקחת דקה או שתיים");
 
     try {
-      const result = await api.scrape(username, password, startDate || undefined);
+      const result = await api.scrape(idNumber, card6Digits, password, startDate || undefined);
       setStatus("success");
       setMessage(result.message);
       // Clear credentials from memory immediately
-      setUsername("");
+      setIdNumber("");
+      setCard6Digits("");
       setPassword("");
     } catch (err) {
       setStatus("error");
@@ -35,17 +37,45 @@ export function ScrapeForm() {
         הם משמשים רק לסריקה הנוכחית ונמחקים מיד לאחריה.
       </div>
 
+      <div className="mb-4 rounded-md bg-blue-50 p-4 text-sm text-blue-800">
+        <strong>ℹ️ אימות:</strong> יש להשתמש בסיסמה הקבועה של ישראכרט (לא SMS).
+        ניתן להגדיר סיסמה קבועה באתר ישראכרט תחת הגדרות אבטחה.
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="scrape-username" className="block text-sm font-medium text-gray-700">
-            שם משתמש ישראכרט
+          <label htmlFor="scrape-id" className="block text-sm font-medium text-gray-700">
+            תעודת זהות
           </label>
           <input
-            id="scrape-username"
+            id="scrape-id"
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            inputMode="numeric"
+            pattern="[0-9]{5,9}"
+            maxLength={9}
+            value={idNumber}
+            onChange={(e) => setIdNumber(e.target.value.replace(/\D/g, ""))}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+            placeholder="מספר תעודת זהות"
+            required
+            autoComplete="off"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="scrape-card6" className="block text-sm font-medium text-gray-700">
+            6 ספרות אחרונות של הכרטיס
+          </label>
+          <input
+            id="scrape-card6"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            value={card6Digits}
+            onChange={(e) => setCard6Digits(e.target.value.replace(/\D/g, ""))}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+            placeholder="6 ספרות אחרונות"
             required
             autoComplete="off"
           />
@@ -53,7 +83,7 @@ export function ScrapeForm() {
 
         <div>
           <label htmlFor="scrape-password" className="block text-sm font-medium text-gray-700">
-            סיסמת ישראכרט
+            סיסמה קבועה
           </label>
           <input
             id="scrape-password"
@@ -61,6 +91,7 @@ export function ScrapeForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+            placeholder="הסיסמה הקבועה שלך בישראכרט"
             required
             autoComplete="off"
           />

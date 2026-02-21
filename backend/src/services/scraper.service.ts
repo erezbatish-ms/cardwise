@@ -1,8 +1,9 @@
 import { CompanyTypes, createScraper } from "israeli-bank-scrapers";
 
 export interface ScrapeCredentials {
-  username: string;
-  password: string;
+  id: string;           // תעודת זהות
+  card6Digits: string;  // 6 ספרות אחרונות של הכרטיס
+  password: string;     // סיסמה קבועה
   startDate: Date;
 }
 
@@ -45,7 +46,8 @@ class ScraperService {
     try {
       const scraper = createScraper(options);
       const result = await scraper.scrape({
-        username: credentials.username,
+        id: credentials.id,
+        card6Digits: credentials.card6Digits,
         password: credentials.password,
       });
 

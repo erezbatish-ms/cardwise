@@ -33,8 +33,9 @@ test.describe("נגישות — Accessibility & RTL", () => {
   test("should have proper form labels on scrape page", async ({ page }) => {
     await login(page);
     await page.getByRole("link", { name: /סריקת נתונים/ }).click();
-    await expect(page.getByLabel("שם משתמש ישראכרט")).toBeVisible();
-    await expect(page.getByLabel("סיסמת ישראכרט")).toBeVisible();
+    await expect(page.getByLabel("תעודת זהות")).toBeVisible();
+    await expect(page.getByLabel("6 ספרות אחרונות של הכרטיס")).toBeVisible();
+    await expect(page.getByLabel("סיסמה קבועה")).toBeVisible();
   });
 
   test("should support keyboard navigation in sidebar", async ({ page }) => {

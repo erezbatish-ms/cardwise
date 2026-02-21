@@ -10,14 +10,15 @@ test.describe("סריקה — Scrape", () => {
   test("should display scrape form with security notice", async ({ page }) => {
     await expect(page.getByText("סריקת נתוני ישראכרט")).toBeVisible();
     await expect(page.getByText("פרטי ההתחברות שלך לא נשמרים")).toBeVisible();
-    await expect(page.getByLabel("שם משתמש ישראכרט")).toBeVisible();
-    await expect(page.getByLabel("סיסמת ישראכרט")).toBeVisible();
+    await expect(page.getByLabel("תעודת זהות")).toBeVisible();
+    await expect(page.getByLabel("6 ספרות אחרונות של הכרטיס")).toBeVisible();
+    await expect(page.getByLabel("סיסמה קבועה")).toBeVisible();
   });
 
   test("should validate required fields", async ({ page }) => {
     await page.getByRole("button", { name: /התחל סריקה/ }).click();
     // HTML5 validation prevents submission
-    await expect(page.getByLabel("שם משתמש ישראכרט")).toBeFocused();
+    await expect(page.getByLabel("תעודת זהות")).toBeFocused();
   });
 
   test("should show loading state during scrape", async ({ page }) => {
@@ -34,8 +35,9 @@ test.describe("סריקה — Scrape", () => {
       });
     });
 
-    await page.getByLabel("שם משתמש ישראכרט").fill("testuser");
-    await page.getByLabel("סיסמת ישראכרט").fill("testpass");
+    await page.getByLabel("תעודת זהות").fill("123456789");
+    await page.getByLabel("6 ספרות אחרונות של הכרטיס").fill("123456");
+    await page.getByLabel("סיסמה קבועה").fill("testpass");
     await page.getByRole("button", { name: /התחל סריקה/ }).click();
 
     await expect(page.getByText("סורק")).toBeVisible();
@@ -53,8 +55,9 @@ test.describe("סריקה — Scrape", () => {
       });
     });
 
-    await page.getByLabel("שם משתמש ישראכרט").fill("testuser");
-    await page.getByLabel("סיסמת ישראכרט").fill("testpass");
+    await page.getByLabel("תעודת זהות").fill("123456789");
+    await page.getByLabel("6 ספרות אחרונות של הכרטיס").fill("123456");
+    await page.getByLabel("סיסמה קבועה").fill("testpass");
     await page.getByRole("button", { name: /התחל סריקה/ }).click();
 
     await expect(page.getByText("נסרקו 25 עסקאות")).toBeVisible();
@@ -71,12 +74,14 @@ test.describe("סריקה — Scrape", () => {
       });
     });
 
-    await page.getByLabel("שם משתמש ישראכרט").fill("testuser");
-    await page.getByLabel("סיסמת ישראכרט").fill("testpass");
+    await page.getByLabel("תעודת זהות").fill("123456789");
+    await page.getByLabel("6 ספרות אחרונות של הכרטיס").fill("123456");
+    await page.getByLabel("סיסמה קבועה").fill("testpass");
     await page.getByRole("button", { name: /התחל סריקה/ }).click();
 
     await expect(page.getByText("סריקה הצליחה")).toBeVisible();
-    await expect(page.getByLabel("שם משתמש ישראכרט")).toHaveValue("");
-    await expect(page.getByLabel("סיסמת ישראכרט")).toHaveValue("");
+    await expect(page.getByLabel("תעודת זהות")).toHaveValue("");
+    await expect(page.getByLabel("6 ספרות אחרונות של הכרטיס")).toHaveValue("");
+    await expect(page.getByLabel("סיסמה קבועה")).toHaveValue("");
   });
 });

@@ -49,10 +49,10 @@ export const api = {
     fetchApi<{ authenticated: boolean }>("/auth/status"),
 
   // Scrape
-  scrape: (username: string, password: string, startDate?: string) =>
+  scrape: (id: string, card6Digits: string, password: string, startDate?: string) =>
     fetchApi<{ status: string; message: string }>("/scrape", {
       method: "POST",
-      body: JSON.stringify({ username, password, startDate }),
+      body: JSON.stringify({ id, card6Digits, password, startDate }),
     }),
 
   // Cards

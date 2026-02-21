@@ -8,19 +8,20 @@ export const scrapeRouter = Router();
 scrapeRouter.use(scrapeRateLimit);
 
 interface ScrapeRequest {
-  username: string;
+  id: string;
+  card6Digits: string;
   password: string;
   startDate?: string;
 }
 
 scrapeRouter.post("/", async (req: Request, res: Response) => {
   try {
-    const { username, password, startDate } = req.body as ScrapeRequest;
+    const { id, card6Digits, password, startDate } = req.body as ScrapeRequest;
 
-    if (!username || !password) {
+    if (!id || !card6Digits || !password) {
       res
         .status(400)
-        .json({ error: "נדרשים שם משתמש וסיסמה של ישראכרט" });
+        .json({ error: "נדרשים תעודת זהות, 6 ספרות אחרונות של הכרטיס וסיסמה" });
       return;
     }
 
@@ -33,7 +34,8 @@ scrapeRouter.post("/", async (req: Request, res: Response) => {
 
     // Run scrape in background (credentials only in memory, never persisted)
     const result = await scraperService.scrape({
-      username,
+      id,
+      card6Digits,
       password,
       startDate: start,
     });
