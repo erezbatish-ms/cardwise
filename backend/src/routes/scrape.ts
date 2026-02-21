@@ -30,9 +30,7 @@ scrapeRouter.post("/", async (req: Request, res: Response) => {
       ? new Date(startDate)
       : new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
 
-    res.json({ status: "scraping", message: "מתחיל סריקה..." });
-
-    // Run scrape in background (credentials only in memory, never persisted)
+    // Run scrape (credentials only in memory, never persisted)
     const result = await scraperService.scrape({
       id,
       card6Digits,

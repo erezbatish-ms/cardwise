@@ -56,7 +56,7 @@ class AnalyticsService {
     for (const txn of transactions) {
       const key = `${txn.date.getFullYear()}-${String(txn.date.getMonth() + 1).padStart(2, "0")}`;
       const current = monthMap.get(key) || { total: 0, count: 0 };
-      current.total += Number(txn.chargedAmount);
+      current.total += Math.abs(Number(txn.chargedAmount));
       current.count++;
       monthMap.set(key, current);
     }
@@ -94,14 +94,14 @@ class AnalyticsService {
     const catMap = new Map(categories.map((c) => [c.id, c]));
 
     const grandTotal = results.reduce(
-      (sum, r) => sum + Number(r._sum.chargedAmount || 0),
+      (sum, r) => sum + Math.abs(Number(r._sum.chargedAmount || 0)),
       0
     );
 
     return results
       .map((r) => {
         const cat = r.categoryId ? catMap.get(r.categoryId) : null;
-        const total = Number(r._sum.chargedAmount || 0);
+        const total = Math.abs(Number(r._sum.chargedAmount || 0));
         return {
           categoryId: r.categoryId,
           categoryName: cat?.name || "לא מסווג",
@@ -129,13 +129,13 @@ class AnalyticsService {
       where,
       _sum: { chargedAmount: true },
       _count: true,
-      orderBy: { _sum: { chargedAmount: "desc" } },
+      orderBy: { _sum: { chargedAmount: "asc" } },
       take: limit,
     });
 
     return results.map((r) => ({
       merchant: r.merchant || "",
-      total: Number(r._sum.chargedAmount || 0),
+      total: Math.abs(Number(r._sum.chargedAmount || 0)),
       count: r._count,
     }));
   }
@@ -151,7 +151,7 @@ class AnalyticsService {
 
     return cards.map((card) => {
       const total = card.transactions.reduce(
-        (sum, t) => sum + Number(t.chargedAmount),
+        (sum, t) => sum + Math.abs(Number(t.chargedAmount)),
         0
       );
       const count = card.transactions.length;
