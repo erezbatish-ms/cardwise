@@ -27,6 +27,37 @@ CardWise is an open-source Hebrew-language web application for analyzing Isracar
 | `infra/docker/` | Docker Compose for local deployment |
 | `docs/` | Documentation |
 
+## Local Development
+
+### Prerequisites
+- Node.js 22+, Docker Desktop running
+- PostgreSQL via Docker: `docker compose -f infra/docker/docker-compose.yml up -d db`
+- Backend `.env` file (see `.env.example`); `dotenv/config` auto-loads it
+
+### Starting Services
+```bash
+# Option 1: Startup script (recommended)
+pwsh start-local.ps1
+
+# Option 2: Manual
+cd backend && npm run dev    # Port 3001 (reads .env via dotenv)
+cd frontend && npm run dev   # Port 5173 (proxies /api to backend)
+```
+
+### Verifying Services (ALWAYS do this after starting or making changes)
+```bash
+# Quick smoke test — run after every restart or code change
+curl http://localhost:3001/api/health                    # Should return {"status":"ok"}
+curl http://localhost:5173                                # Should return 200
+curl -X POST http://localhost:5173/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"password":"testpassword"}' -v                    # Should return Set-Cookie header
+```
+**Important**: Always verify the backend is responding after restarting it. The backend loads environment variables from `backend/.env` via `dotenv/config`. If the `.env` file is missing, session cookies will not work and login will appear to succeed but immediately redirect back.
+
+### Default Test Credentials
+- App password: `testpassword` (set via `APP_PASSWORD` in `.env`)
+
 ## Build & Test Commands
 
 ```bash
