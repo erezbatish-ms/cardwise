@@ -1,0 +1,69 @@
+name: Deploy to Azure
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_RESOURCE_GROUP: rg-cardwise
+  AZURE_LOCATION: westeurope
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Infrastructure (Bicep)
+        uses: azure/arm-deploy@v2
+        with:
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
+          template: infra/azure/main.bicep
+          parameters: infra/azure/parameters.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build & Deploy Backend
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma generate
+          npm run build
+          zip -r ../backend.zip . -x "node_modules/*" "src/*"
+        
+      - name: Deploy Backend to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: app-cardwise-backend
+          package: backend.zip
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy Frontend to Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN }}
+          action: upload
+          app_location: frontend
+          output_location: dist

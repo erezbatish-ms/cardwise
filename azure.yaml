@@ -1,0 +1,20 @@
+name: cardwise
+metadata:
+  template: cardwise@1.0.0
+hooks:
+  postprovision:
+    shell: sh
+    run: |
+      cd backend
+      npm ci
+      npx prisma migrate deploy
+      npx tsx src/prisma/seed.ts
+services:
+  backend:
+    project: ./backend
+    host: appservice
+    language: ts
+  frontend:
+    project: ./frontend
+    host: staticwebapp
+    language: ts

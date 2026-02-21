@@ -1,0 +1,85 @@
+// Prisma schema for CardWise
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Card {
+  id             String        @id @default(uuid())
+  lastFourDigits String        @map("last_four_digits")
+  cardName       String?       @map("card_name")
+  provider       String        @default("isracard")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  transactions   Transaction[]
+  scrapeHistory  ScrapeLog[]
+
+  @@map("cards")
+}
+
+model Transaction {
+  id               String    @id @default(uuid())
+  cardId           String    @map("card_id")
+  card             Card      @relation(fields: [cardId], references: [id])
+  date             DateTime
+  processedDate    DateTime? @map("processed_date")
+  description      String
+  originalAmount   Decimal   @map("original_amount")
+  chargedAmount    Decimal   @map("charged_amount")
+  currency         String    @default("ILS")
+  categoryId       String?   @map("category_id")
+  category         Category? @relation(fields: [categoryId], references: [id])
+  categorySource   String    @default("ai") @map("category_source")
+  merchant         String?
+  installmentNum   Int?      @map("installment_num")
+  installmentTotal Int?      @map("installment_total")
+  memo             String?
+  scraperTxnId     String?   @unique @map("scraper_txn_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@index([cardId, date])
+  @@index([categoryId])
+  @@map("transactions")
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  icon         String?
+  color        String?
+  isDefault    Boolean       @default(false) @map("is_default")
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model ScrapeLog {
+  id           String   @id @default(uuid())
+  cardId       String   @map("card_id")
+  card         Card     @relation(fields: [cardId], references: [id])
+  status       String
+  txnCount     Int      @default(0) @map("txn_count")
+  startDate    DateTime @map("start_date")
+  endDate      DateTime @map("end_date")
+  errorMessage String?  @map("error_message")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("scrape_logs")
+}
+
+model InsightCache {
+  id        String   @id @default(uuid())
+  type      String
+  cardScope String   @map("card_scope")
+  period    String
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+
+  @@unique([type, cardScope, period])
+  @@map("insight_cache")
+}
