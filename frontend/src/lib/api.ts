@@ -27,12 +27,22 @@ async function fetchApi<T>(
 }
 
 export const api = {
-  // Auth
-  login: (password: string) =>
-    fetchApi<{ success: boolean }>("/auth/login", {
+  // Auth — login bypasses fetchApi to avoid 401 redirect
+  login: async (password: string): Promise<{ success: boolean }> => {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
-    }),
+    });
+    if (res.status === 401) {
+      return { success: false };
+    }
+    if (!res.ok) {
+      throw new Error("שגיאת שרת");
+    }
+    return res.json();
+  },
   logout: () =>
     fetchApi<{ success: boolean }>("/auth/logout", { method: "POST" }),
   authStatus: () =>

@@ -12,7 +12,7 @@ test.describe("אימות — Authentication", () => {
   test("should login with correct password", async ({ page }) => {
     await login(page);
     await expect(page).toHaveURL("/");
-    await expect(page.getByText("לוח בקרה")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "לוח בקרה" })).toBeVisible();
   });
 
   test("should show error for wrong password", async ({ page }) => {

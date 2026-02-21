@@ -1,28 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { api } from "../lib/api";
+import { useContext } from "react";
+import { AuthContext, type AuthContextType } from "../contexts/AuthContext";
 
-export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    api
-      .authStatus()
-      .then((res) => setIsAuthenticated(res.authenticated))
-      .catch(() => setIsAuthenticated(false))
-      .finally(() => setIsLoading(false));
-  }, []);
-
-  const login = useCallback(async (password: string) => {
-    const res = await api.login(password);
-    setIsAuthenticated(res.success);
-    return res.success;
-  }, []);
-
-  const logout = useCallback(async () => {
-    await api.logout();
-    setIsAuthenticated(false);
-  }, []);
-
-  return { isAuthenticated, isLoading, login, logout };
+export function useAuth(): AuthContextType {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 }

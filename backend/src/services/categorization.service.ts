@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { AzureOpenAI } from "openai";
+import { DefaultAzureCredential, getBearerTokenProvider } from "@azure/identity";
 
 const prisma = new PrismaClient();
 
@@ -11,17 +12,36 @@ interface UncategorizedTxn {
 }
 
 class CategorizationService {
-  private client: AzureOpenAI;
-  private deployment: string;
+  private _client: AzureOpenAI | null = null;
 
-  constructor() {
-    this.client = new AzureOpenAI({
-      endpoint: process.env.AZURE_OPENAI_ENDPOINT!,
-      apiKey: process.env.AZURE_OPENAI_API_KEY!,
-      apiVersion: process.env.AZURE_OPENAI_API_VERSION || "2024-10-21",
-    });
-    this.deployment =
-      process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o";
+  private get client(): AzureOpenAI {
+    if (!this._client) {
+      if (!process.env.AZURE_OPENAI_ENDPOINT) {
+        throw new Error("Azure OpenAI endpoint not configured");
+      }
+      if (process.env.AZURE_OPENAI_API_KEY) {
+        this._client = new AzureOpenAI({
+          endpoint: process.env.AZURE_OPENAI_ENDPOINT,
+          apiKey: process.env.AZURE_OPENAI_API_KEY,
+          apiVersion: process.env.AZURE_OPENAI_API_VERSION || "2025-01-01-preview",
+        });
+      } else {
+        // Use Entra ID / DefaultAzureCredential
+        const credential = new DefaultAzureCredential();
+        const scope = "https://cognitiveservices.azure.com/.default";
+        const azureADTokenProvider = getBearerTokenProvider(credential, scope);
+        this._client = new AzureOpenAI({
+          endpoint: process.env.AZURE_OPENAI_ENDPOINT,
+          azureADTokenProvider,
+          apiVersion: process.env.AZURE_OPENAI_API_VERSION || "2025-01-01-preview",
+        });
+      }
+    }
+    return this._client;
+  }
+
+  private get deployment(): string {
+    return process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o-mini";
   }
 
   async categorize(
@@ -62,12 +82,14 @@ ${batch.map((t, idx) => `${idx + 1}. "${t.description}" - ${t.chargedAmount} ₪
           max_tokens: 1000,
         });
 
-        const content = response.choices[0]?.message?.content?.trim();
-        if (!content) {
+        const rawContent = response.choices[0]?.message?.content?.trim();
+        if (!rawContent) {
           failed += batch.length;
           continue;
         }
 
+        // Strip markdown code fences if present
+        const content = rawContent.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "");
         const results: { index: number; category: string }[] = JSON.parse(content);
 
         for (const result of results) {

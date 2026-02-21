@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Page, expect } from "@playwright/test";
 
 const APP_PASSWORD = process.env.APP_PASSWORD || "testpassword";
 
@@ -11,5 +11,5 @@ export async function login(page: Page): Promise<void> {
 
 export async function logout(page: Page): Promise<void> {
   await page.getByRole("button", { name: /התנתק/ }).click();
-  await page.waitForURL("/login");
+  await expect(page).toHaveURL(/\/login/);
 }

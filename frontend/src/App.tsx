@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { LoginForm } from "./components/layout/LoginForm";
+import { AuthProvider } from "./contexts/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 
 function ProtectedRoutes() {
@@ -24,10 +25,12 @@ function ProtectedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/*" element={<ProtectedRoutes />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/*" element={<ProtectedRoutes />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

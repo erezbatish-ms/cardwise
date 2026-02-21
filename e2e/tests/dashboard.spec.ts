@@ -63,7 +63,7 @@ test.describe("לוח בקרה — Dashboard", () => {
   });
 
   test("should display dashboard with all widgets", async ({ page }) => {
-    await expect(page.getByText("לוח בקרה")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "לוח בקרה" })).toBeVisible();
     await expect(page.getByText("מגמות הוצאות")).toBeVisible();
     await expect(page.getByText("פילוח לפי קטגוריות")).toBeVisible();
     await expect(page.getByText("בתי עסק מובילים")).toBeVisible();

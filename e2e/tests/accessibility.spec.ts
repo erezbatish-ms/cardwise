@@ -39,8 +39,8 @@ test.describe("נגישות — Accessibility & RTL", () => {
 
   test("should support keyboard navigation in sidebar", async ({ page }) => {
     await login(page);
-    // Tab through sidebar links
-    const sidebarLinks = page.getByRole("link");
+    // Check sidebar navigation links exist
+    const sidebarLinks = page.locator("nav").getByRole("link");
     const count = await sidebarLinks.count();
     expect(count).toBeGreaterThanOrEqual(3);
   });

@@ -53,7 +53,7 @@ test.describe("עסקאות — Transactions", () => {
   });
 
   test("should display transaction list", async ({ page }) => {
-    await expect(page.getByText("עסקאות")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "עסקאות" })).toBeVisible();
     await expect(page.getByText("מסעדת שווארמה")).toBeVisible();
     await expect(page.getByText("רמי לוי")).toBeVisible();
     await expect(page.getByText("דן אוטובוסים")).toBeVisible();
