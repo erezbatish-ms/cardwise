@@ -37,7 +37,7 @@ export function TransactionList() {
 
   const { data: cards } = useApi(() => api.getCards(), []);
   const { data: categories, refetch: refetchCats } = useApi(() => api.getCategories(), []);
-  const { data, isLoading, refetch, silentRefetch } = useApi(
+  const { data, setData, isLoading, refetch, silentRefetch } = useApi(
     () =>
       api.getTransactions({
         ...(cardId ? { cardId } : {}),
@@ -53,8 +53,21 @@ export function TransactionList() {
   const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
 
   async function handleCategoryChange(txnId: string, categoryId: string) {
-    await api.updateCategory(txnId, categoryId);
+    const txn = data?.transactions.find((t) => t.id === txnId);
+    const newCat = categories?.find((c) => c.id === categoryId) ?? null;
+
+    // Optimistic update: update all transactions from the same merchant locally
+    if (data && txn) {
+      const updatedTxns = data.transactions.map((t) =>
+        t.merchant === txn.merchant
+          ? { ...t, categoryId, category: newCat, categorySource: "manual" as const }
+          : t
+      );
+      setData({ ...data, transactions: updatedTxns });
+    }
+
     setEditingTxn(null);
+    await api.updateCategory(txnId, categoryId);
     silentRefetch();
   }
 

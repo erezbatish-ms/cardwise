@@ -37,5 +37,5 @@ export function useApi<T>(
     refetch();
   }, [refetch]);
 
-  return { data, error, isLoading, refetch, silentRefetch };
+  return { data, setData, error, isLoading, refetch, silentRefetch };
 }
