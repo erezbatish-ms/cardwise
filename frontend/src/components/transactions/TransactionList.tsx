@@ -202,8 +202,12 @@ export function TransactionList() {
                   <tr key={txn.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap">{formatDate(txn.date)}</td>
                     <td className="px-4 py-3">{txn.description}</td>
-                    <td className="px-4 py-3 whitespace-nowrap font-medium">
+                    <td className={`px-4 py-3 whitespace-nowrap font-medium ${txn.chargedAmount > 0 ? "text-green-600" : ""}`}>
+                      {txn.chargedAmount > 0 ? "+" : ""}
                       {formatCurrency(Math.abs(txn.chargedAmount))}
+                      {txn.chargedAmount > 0 && (
+                        <span className="mr-1 rounded bg-green-100 px-1 text-xs text-green-700">זיכוי</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       {editingTxn?.id === txn.id ? (

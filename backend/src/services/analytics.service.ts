@@ -56,13 +56,14 @@ class AnalyticsService {
     for (const txn of transactions) {
       const key = `${txn.date.getFullYear()}-${String(txn.date.getMonth() + 1).padStart(2, "0")}`;
       const current = monthMap.get(key) || { total: 0, count: 0 };
-      current.total += Math.abs(Number(txn.chargedAmount));
+      // Sum raw amounts: negatives (charges) and positives (refunds) net out
+      current.total += Number(txn.chargedAmount);
       current.count++;
       monthMap.set(key, current);
     }
 
     return Array.from(monthMap.entries())
-      .map(([month, data]) => ({ month, ...data }))
+      .map(([month, data]) => ({ month, total: Math.abs(data.total), count: data.count }))
       .sort((a, b) => a.month.localeCompare(b.month));
   }
 
@@ -173,10 +174,12 @@ class AnalyticsService {
     });
 
     return cards.map((card) => {
-      const total = card.transactions.reduce(
-        (sum, t) => sum + Math.abs(Number(t.chargedAmount)),
+      // Sum raw amounts (negatives net against positives/refunds)
+      const rawTotal = card.transactions.reduce(
+        (sum, t) => sum + Number(t.chargedAmount),
         0
       );
+      const total = Math.abs(rawTotal);
       const count = card.transactions.length;
       return {
         cardId: card.id,

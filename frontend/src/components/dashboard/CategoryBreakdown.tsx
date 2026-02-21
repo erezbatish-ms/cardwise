@@ -191,8 +191,12 @@ function CategoryTransactions({
                 <tr key={txn.id} className="hover:bg-white">
                   <td className="px-3 py-2 whitespace-nowrap">{formatDate(txn.date)}</td>
                   <td className="px-3 py-2">{txn.description}</td>
-                  <td className="px-3 py-2 whitespace-nowrap font-medium">
+                  <td className={`px-3 py-2 whitespace-nowrap font-medium ${txn.chargedAmount > 0 ? "text-green-600" : ""}`}>
+                    {txn.chargedAmount > 0 ? "+" : ""}
                     {formatCurrency(Math.abs(txn.chargedAmount))}
+                    {txn.chargedAmount > 0 && (
+                      <span className="mr-1 rounded bg-green-100 px-1 text-xs text-green-700">זיכוי</span>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-gray-500">
                     ****{txn.card.lastFourDigits}
