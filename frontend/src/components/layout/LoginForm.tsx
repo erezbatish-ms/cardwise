@@ -3,6 +3,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const BACKEND_URL = "/api/auth";
+const isDev = import.meta.env.DEV;
 
 const ALL_PROVIDERS = [
   {
@@ -30,7 +31,8 @@ const ALL_PROVIDERS = [
 
 export function LoginForm() {
   const [error, setError] = useState("");
-  const { isAuthenticated } = useAuth();
+  const [devLoading, setDevLoading] = useState(false);
+  const { isAuthenticated, checkAuth } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -57,6 +59,24 @@ export function LoginForm() {
 
   function handleLogin(providerId: string) {
     window.location.href = `${BACKEND_URL}/${providerId}`;
+  }
+
+  async function handleDevLogin() {
+    setDevLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${BACKEND_URL}/test-login`, { method: "POST", credentials: "include" });
+      if (res.ok) {
+        await checkAuth();
+        navigate("/", { replace: true });
+      } else {
+        setError("התחברות פיתוח נכשלה");
+      }
+    } catch {
+      setError("שגיאה בהתחברות לשרת");
+    } finally {
+      setDevLoading(false);
+    }
   }
 
   return (
@@ -99,6 +119,19 @@ export function LoginForm() {
           <br />
           משתמש חדש? ההרשמה מתבצעת אוטומטית בהתחברות הראשונה.
         </p>
+
+        {isDev && (
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <p className="mb-2 text-center text-xs text-amber-600">⚠️ סביבת פיתוח</p>
+            <button
+              onClick={handleDevLogin}
+              disabled={devLoading}
+              className="w-full rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
+            >
+              {devLoading ? "מתחבר..." : "🔧 התחבר כמשתמש פיתוח"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

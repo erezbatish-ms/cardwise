@@ -6,6 +6,7 @@ export interface AuthContextType {
   isLoading: boolean;
   user: AuthUser | null;
   logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -29,6 +30,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
+  const checkAuth = useCallback(async () => {
+    try {
+      const res = await api.authStatus();
+      setIsAuthenticated(res.authenticated);
+      setUser(res.user || null);
+    } catch {
+      setIsAuthenticated(false);
+      setUser(null);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     await api.logout();
     setIsAuthenticated(false);
@@ -36,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );
