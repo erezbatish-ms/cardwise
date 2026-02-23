@@ -6,7 +6,7 @@ test.describe("אימות — Authentication", () => {
     await page.goto("/");
     await expect(page).toHaveURL("/login");
     await expect(page.getByText("CardWise")).toBeVisible();
-    await expect(page.getByText("התחבר באמצעות")).toBeVisible();
+    await expect(page.getByText("התחבר או הרשם באמצעות")).toBeVisible();
   });
 
   test("should login via test endpoint and see dashboard", async ({ page }) => {

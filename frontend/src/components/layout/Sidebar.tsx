@@ -37,6 +37,13 @@ export function Sidebar({ onLogout, user }: SidebarProps) {
             <div className="truncate text-sm font-medium text-gray-900">{user.displayName}</div>
             <div className="truncate text-xs text-gray-500">{user.email}</div>
           </div>
+          <button
+            onClick={onLogout}
+            className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600"
+            title="התנתק"
+          >
+            🚪
+          </button>
         </div>
       )}
 
@@ -63,7 +70,7 @@ export function Sidebar({ onLogout, user }: SidebarProps) {
       <div className="border-t border-gray-200 p-4">
         <button
           onClick={onLogout}
-          className="w-full rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
+          className="w-full rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
         >
           🚪 התנתק
         </button>

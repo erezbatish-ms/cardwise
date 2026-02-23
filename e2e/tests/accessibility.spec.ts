@@ -26,8 +26,12 @@ test.describe("נגישות — Accessibility & RTL", () => {
 
   test("should have proper form labels on login page", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByText("התחבר באמצעות")).toBeVisible();
+    await expect(page.getByText("התחבר או הרשם באמצעות")).toBeVisible();
     await expect(page.getByText("CardWise")).toBeVisible();
+    // All 3 provider buttons should always be visible
+    await expect(page.getByText("התחבר עם Google")).toBeVisible();
+    await expect(page.getByText("התחבר עם Microsoft")).toBeVisible();
+    await expect(page.getByText("התחבר עם Facebook")).toBeVisible();
   });
 
   test("should have proper form labels on scrape page", async ({ page }) => {
