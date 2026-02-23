@@ -80,15 +80,18 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="w-full max-w-md animate-slide-up rounded-2xl border border-gray-100 bg-white/90 p-8 shadow-card-lg backdrop-blur-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">💳 CardWise</h1>
-          <p className="mt-2 text-gray-600">ניתוח חכם של הוצאות כרטיס אשראי</p>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+            <span className="text-3xl">💳</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">CardWise</h1>
+          <p className="mt-1 text-sm text-gray-400">ניתוח חכם של הוצאות כרטיס אשראי</p>
         </div>
 
         <div className="space-y-3">
-          <p className="text-center text-sm font-medium text-gray-700 mb-4">
+          <p className="text-center text-sm font-medium text-gray-600 mb-4">
             התחבר או הרשם באמצעות
           </p>
 
@@ -96,7 +99,7 @@ export function LoginForm() {
             <button
               key={provider.id}
               onClick={() => handleLogin(provider.id)}
-              className={`flex w-full items-center justify-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-colors ${provider.bg} ${provider.hover}`}
+              className={`flex w-full items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-medium shadow-sm transition-all duration-150 hover:shadow-md active:scale-[0.98] ${provider.bg} ${provider.hover}`}
             >
               {provider.icon ? (
                 <img src={provider.icon} alt="" className="h-5 w-5" />
@@ -109,24 +112,24 @@ export function LoginForm() {
         </div>
 
         {error && (
-          <div className="mt-4 rounded-md bg-red-50 p-3 text-center text-sm text-red-600" role="alert">
+          <div className="mt-4 animate-fade-in rounded-xl border border-red-100 bg-red-50/50 p-3 text-center text-sm text-red-600" role="alert">
             {error}
           </div>
         )}
 
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-6 text-center text-xs text-gray-400 leading-relaxed">
           לחיצה על אחד הכפתורים תפנה אותך לדף ההתחברות של הספק.
           <br />
           משתמש חדש? ההרשמה מתבצעת אוטומטית בהתחברות הראשונה.
         </p>
 
         {isDev && (
-          <div className="mt-6 border-t border-gray-200 pt-4">
-            <p className="mb-2 text-center text-xs text-amber-600">⚠️ סביבת פיתוח</p>
+          <div className="mt-6 border-t border-gray-100 pt-4">
+            <p className="mb-2 text-center text-xs text-amber-500">⚠️ סביבת פיתוח</p>
             <button
               onClick={handleDevLogin}
               disabled={devLoading}
-              className="w-full rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
+              className="w-full rounded-xl border border-amber-200 bg-amber-50/50 px-4 py-2.5 text-sm font-medium text-amber-700 transition-all hover:bg-amber-100 hover:shadow-sm disabled:opacity-50"
             >
               {devLoading ? "מתחבר..." : "🔧 התחבר כמשתמש פיתוח"}
             </button>

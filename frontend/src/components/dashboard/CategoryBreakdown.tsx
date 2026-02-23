@@ -12,6 +12,7 @@ import { useSort, sortTransactions } from "../../hooks/useSort";
 import { formatCurrency, formatDate } from "../../lib/utils";
 import { CategoryEditor } from "../transactions/CategoryEditor";
 import { SortableHeader } from "../shared/SortableHeader";
+import { Card, CardSkeleton } from "../shared/Card";
 
 interface Props {
   startDate?: string;
@@ -27,21 +28,13 @@ export function CategoryBreakdown({ startDate, endDate }: Props) {
     [startDate, endDate]
   );
 
-  if (isLoading) {
-    return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">🥧 פילוח לפי קטגוריות</h3>
-        <div className="flex h-[300px] items-center justify-center text-gray-400">טוען...</div>
-      </div>
-    );
-  }
+  if (isLoading) return <CardSkeleton title="🥧 פילוח לפי קטגוריות" height={250} />;
 
   if (error) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 text-lg font-semibold">🥧 פילוח לפי קטגוריות</h3>
+      <Card title="🥧 פילוח לפי קטגוריות">
         <div className="flex h-[300px] items-center justify-center text-red-500">{error}</div>
-      </div>
+      </Card>
     );
   }
 
@@ -63,8 +56,7 @@ export function CategoryBreakdown({ startDate, endDate }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
-      <h3 className="mb-4 text-lg font-semibold">🥧 פילוח לפי קטגוריות</h3>
+    <Card title="🥧 פילוח לפי קטגוריות">
       <div className="flex flex-col items-center gap-4 lg:flex-row">
         <div className="w-full lg:w-1/2">
           <ResponsiveContainer width="100%" height={250}>
@@ -87,37 +79,38 @@ export function CategoryBreakdown({ startDate, endDate }: Props) {
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.color}
-                    stroke={selectedCat?.id === entry.categoryId ? "#1f2937" : undefined}
-                    strokeWidth={selectedCat?.id === entry.categoryId ? 3 : 1}
+                    stroke={selectedCat?.id === entry.categoryId ? "#1f2937" : "#fff"}
+                    strokeWidth={selectedCat?.id === entry.categoryId ? 3 : 2}
                   />
                 ))}
               </Pie>
               <Tooltip
                 formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                contentStyle={{ borderRadius: "0.75rem", border: "1px solid #e2e8f0", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
               />
             </PieChart>
           </ResponsiveContainer>
         </div>
         <div className="max-h-[250px] w-full overflow-y-auto lg:w-1/2">
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {chartData?.map((c) => (
               <button
                 key={c.name}
                 onClick={() => handleCategoryClick(c.categoryId, c.name)}
-                className={`flex w-full items-center gap-2 rounded px-1 py-0.5 text-sm transition-colors hover:bg-gray-100 ${
-                  selectedCat?.id === c.categoryId ? "bg-gray-100 ring-1 ring-gray-300" : ""
+                className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-all duration-150 hover:bg-gray-50 ${
+                  selectedCat?.id === c.categoryId ? "bg-blue-50 ring-1 ring-blue-200" : ""
                 }`}
               >
                 <span
-                  className="inline-block h-3 w-3 flex-shrink-0 rounded-full"
+                  className="inline-block h-3 w-3 flex-shrink-0 rounded-full shadow-sm"
                   style={{ backgroundColor: c.color }}
                 />
                 <span className="flex-shrink-0">{c.icon}</span>
-                <span className="flex-1 truncate text-right">{c.name}</span>
-                <span className="flex-shrink-0 text-gray-500">
+                <span className="flex-1 truncate text-right text-gray-700">{c.name}</span>
+                <span className="flex-shrink-0 text-xs text-gray-400">
                   {c.percentage.toFixed(0)}%
                 </span>
-                <span className="flex-shrink-0 font-medium">
+                <span className="flex-shrink-0 font-medium text-gray-800">
                   {formatCurrency(c.value)}
                 </span>
               </button>
@@ -141,7 +134,7 @@ export function CategoryBreakdown({ startDate, endDate }: Props) {
           }}
         />
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -203,24 +196,28 @@ function CategoryTransactions({
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+    <div className="mt-6 animate-slide-up rounded-xl border border-gray-100 bg-gray-50/80 p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h4 className="font-medium">
-          עסקאות בקטגוריה: {categoryName} ({data?.pagination.total ?? "..."})
+        <h4 className="font-semibold text-gray-800">
+          עסקאות בקטגוריה: {categoryName} <span className="text-sm font-normal text-gray-400">({data?.pagination.total ?? "..."})</span>
         </h4>
         <button
           onClick={onClose}
-          className="rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-200"
+          className="rounded-lg px-3 py-1 text-sm text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600"
         >
           ✕ סגור
         </button>
       </div>
       {isLoading ? (
-        <div className="py-4 text-center text-gray-400">טוען...</div>
+        <div className="space-y-2 py-4">
+          <div className="skeleton h-8 w-full" />
+          <div className="skeleton h-8 w-full" />
+          <div className="skeleton h-8 w-3/4" />
+        </div>
       ) : (
-        <div className="max-h-[300px] overflow-y-auto">
+        <div className="max-h-[300px] overflow-y-auto rounded-lg">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-gray-100">
+            <thead className="sticky top-0 bg-gray-100/95 backdrop-blur-sm">
               <tr>
                 <SortableHeader label="תאריך" field="date" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
                 <SortableHeader label="תיאור" field="description" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
@@ -229,9 +226,9 @@ function CategoryTransactions({
                 <SortableHeader label="כרטיס" field="card" currentField={sortField} currentDir={sortDir} onSort={toggleSort} className="px-3 py-2" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {sortedTransactions.map((txn) => (
-                <tr key={txn.id} className="hover:bg-white">
+            <tbody className="divide-y divide-gray-100">
+              {sortedTransactions.map((txn, i) => (
+                <tr key={txn.id} className={`transition-colors hover:bg-white ${i % 2 === 0 ? "bg-white/50" : ""}`}>
                   <td className="px-3 py-2 whitespace-nowrap">{formatDate(txn.date)}</td>
                   <td className="px-3 py-2">{txn.description}</td>
                   <td className={`px-3 py-2 whitespace-nowrap font-medium ${txn.chargedAmount > 0 ? "text-green-600" : ""}`}>

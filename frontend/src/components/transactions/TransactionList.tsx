@@ -95,19 +95,22 @@ export function TransactionList() {
   }
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">עסקאות</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">עסקאות</h2>
+          <p className="text-sm text-gray-400">ניהול וסיווג עסקאות</p>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => setShowNewCat(!showNewCat)}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-card transition-all hover:shadow-card-hover"
           >
             ➕ קטגוריה חדשה
           </button>
           <button
             onClick={handleAutoCategorize}
-            className="rounded-md bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700"
+            className="rounded-lg bg-gradient-to-l from-purple-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-card transition-all hover:shadow-card-hover"
           >
             🤖 סווג אוטומטית
           </button>
@@ -116,49 +119,49 @@ export function TransactionList() {
 
       {/* New Category Form */}
       {showNewCat && (
-        <div className="mb-4 flex items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="mb-4 flex animate-slide-up items-end gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-card">
           <div>
-            <label className="mb-1 block text-xs text-gray-600">שם קטגוריה</label>
+            <label className="mb-1 block text-xs font-medium text-gray-500">שם קטגוריה</label>
             <input
               type="text"
               value={newCatName}
               onChange={(e) => setNewCatName(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm transition-colors focus:border-blue-300"
               placeholder="למשל: חיות מחמד"
               aria-label="שם קטגוריה חדשה"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-600">אייקון</label>
+            <label className="mb-1 block text-xs font-medium text-gray-500">אייקון</label>
             <input
               type="text"
               value={newCatIcon}
               onChange={(e) => setNewCatIcon(e.target.value)}
-              className="w-16 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              className="w-16 rounded-lg border border-gray-200 px-3 py-1.5 text-sm transition-colors focus:border-blue-300"
               placeholder="🐾"
               aria-label="אייקון קטגוריה"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-600">צבע</label>
+            <label className="mb-1 block text-xs font-medium text-gray-500">צבע</label>
             <input
               type="color"
               value={newCatColor}
               onChange={(e) => setNewCatColor(e.target.value)}
-              className="h-8 w-10 cursor-pointer rounded border border-gray-300"
+              className="h-8 w-10 cursor-pointer rounded-lg border border-gray-200"
               aria-label="צבע קטגוריה"
             />
           </div>
           <button
             onClick={handleCreateCategory}
             disabled={!newCatName.trim()}
-            className="rounded-md bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
           >
             צור
           </button>
           <button
             onClick={() => setShowNewCat(false)}
-            className="rounded-md border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-50"
           >
             ביטול
           </button>
@@ -166,11 +169,11 @@ export function TransactionList() {
       )}
 
       {/* Filters */}
-      <div className="mb-4 flex gap-4">
+      <div className="mb-4 flex gap-3">
         <select
           value={selectedMonth}
           onChange={(e) => { setSelectedMonth(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-card transition-shadow hover:shadow-card-hover focus:border-blue-300"
           aria-label="סנן לפי חודש"
         >
           {getMonthOptions().map((opt) => (
@@ -181,7 +184,7 @@ export function TransactionList() {
         <select
           value={cardId}
           onChange={(e) => { setCardId(e.target.value); setPage(1); }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-card transition-shadow hover:shadow-card-hover focus:border-blue-300"
           aria-label="סנן לפי כרטיס"
         >
           <option value="">כל הכרטיסים</option>
@@ -194,22 +197,24 @@ export function TransactionList() {
 
         <input
           type="search"
-          placeholder="חפש עסקה..."
+          placeholder="🔍 חפש עסקה..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+          className="flex-1 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-card transition-shadow placeholder:text-gray-300 hover:shadow-card-hover focus:border-blue-300"
           aria-label="חיפוש עסקאות"
         />
       </div>
 
       {/* Table */}
       {isLoading ? (
-        <div className="py-8 text-center text-gray-500">טוען עסקאות...</div>
+        <div className="space-y-2 py-8">
+          {[...Array(8)].map((_, i) => <div key={i} className="skeleton h-12 w-full" />)}
+        </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white shadow-card">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50/80">
                 <tr>
                   <SortableHeader label="תאריך" field="date" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
                   <SortableHeader label="תיאור" field="description" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
@@ -218,16 +223,16 @@ export function TransactionList() {
                   <SortableHeader label="כרטיס" field="card" currentField={sortField} currentDir={sortDir} onSort={toggleSort} />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {sortedTransactions.map((txn) => (
-                  <tr key={txn.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 whitespace-nowrap">{formatDate(txn.date)}</td>
-                    <td className="px-4 py-3">{txn.description}</td>
-                    <td className={`px-4 py-3 whitespace-nowrap font-medium ${txn.chargedAmount > 0 ? "text-green-600" : ""}`}>
+              <tbody className="divide-y divide-gray-50">
+                {sortedTransactions.map((txn, i) => (
+                  <tr key={txn.id} className={`transition-colors hover:bg-blue-50/30 ${i % 2 === 0 ? "" : "bg-gray-50/30"}`}>
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-600">{formatDate(txn.date)}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">{txn.description}</td>
+                    <td className={`px-4 py-3 whitespace-nowrap font-semibold ${txn.chargedAmount > 0 ? "text-emerald-600" : "text-gray-800"}`}>
                       {txn.chargedAmount > 0 ? "+" : ""}
                       {formatCurrency(Math.abs(txn.chargedAmount))}
                       {txn.chargedAmount > 0 && (
-                        <span className="mr-1 rounded bg-green-100 px-1 text-xs text-green-700">זיכוי</span>
+                        <span className="mr-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">זיכוי</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -241,20 +246,20 @@ export function TransactionList() {
                       ) : (
                         <button
                           onClick={() => setEditingTxn(txn)}
-                          className="rounded px-2 py-1 text-xs hover:bg-gray-100"
+                          className="rounded-lg px-2.5 py-1 text-xs transition-colors hover:bg-gray-100"
                           title="לחץ לשינוי קטגוריה"
                         >
                           {txn.category ? (
-                            <span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 font-medium text-gray-700">
                               {txn.category.icon} {txn.category.name}
                             </span>
                           ) : (
-                            <span className="text-gray-400">לא מסווג</span>
+                            <span className="text-gray-400 italic">לא מסווג</span>
                           )}
                         </button>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500">
+                    <td className="px-4 py-3 text-gray-400">
                       ****{txn.card.lastFourDigits}
                     </td>
                   </tr>
@@ -265,23 +270,23 @@ export function TransactionList() {
 
           {/* Pagination */}
           {data && data.pagination.pages > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-2">
+            <div className="mt-4 flex items-center justify-center gap-3">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-card transition-all hover:shadow-card-hover disabled:opacity-40"
               >
-                הקודם
+                ← הקודם
               </button>
-              <span className="text-sm text-gray-600">
-                עמוד {page} מתוך {data.pagination.pages}
+              <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600">
+                {page} / {data.pagination.pages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(data.pagination.pages, p + 1))}
                 disabled={page >= data.pagination.pages}
-                className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-card transition-all hover:shadow-card-hover disabled:opacity-40"
               >
-                הבא
+                הבא →
               </button>
             </div>
           )}
