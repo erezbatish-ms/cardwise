@@ -76,8 +76,9 @@ test.describe("לוח בקרה — Dashboard", () => {
   });
 
   test("should display category legend instead of pie labels", async ({ page }) => {
-    // Legend items should have colored dots with category names
-    const legend = page.locator(".rounded-full");
+    // Legend items should have colored dots with category names inside the category breakdown section
+    const categorySection = page.locator("text=פילוח לפי קטגוריות").locator("..");
+    const legend = categorySection.locator(".rounded-full");
     await expect(legend.first()).toBeVisible();
     expect(await legend.count()).toBeGreaterThanOrEqual(2);
   });

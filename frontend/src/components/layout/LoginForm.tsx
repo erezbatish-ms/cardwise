@@ -27,8 +27,9 @@ const PROVIDER_CONFIG: Record<string, { label: string; icon: string; bg: string;
 };
 
 export function LoginForm() {
-  const [providers, setProviders] = useState<string[]>([]);
+  const [providers, setProviders] = useState<string[] | null>(null);
   const [error, setError] = useState("");
+  const [devLoading, setDevLoading] = useState(false);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -47,11 +48,31 @@ export function LoginForm() {
   }, [searchParams]);
 
   useEffect(() => {
-    api.authProviders().then((res) => setProviders(res.providers)).catch(() => {});
+    api.authProviders().then((res) => setProviders(res.providers)).catch(() => setProviders([]));
   }, []);
 
   function handleLogin(provider: string) {
     window.location.href = `${BACKEND_URL}/${provider}`;
+  }
+
+  async function handleDevLogin() {
+    setDevLoading(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/test-login`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        window.location.href = "/";
+      } else {
+        setError("שגיאה בהתחברות לסביבת פיתוח");
+      }
+    } catch {
+      setError("שגיאה בהתחברות");
+    } finally {
+      setDevLoading(false);
+    }
   }
 
   return (
@@ -67,11 +88,11 @@ export function LoginForm() {
             התחבר באמצעות
           </p>
 
-          {providers.length === 0 && (
+          {providers === null && (
             <div className="text-center text-sm text-gray-400">טוען...</div>
           )}
 
-          {providers.map((provider) => {
+          {providers && providers.length > 0 && providers.map((provider) => {
             const config = PROVIDER_CONFIG[provider];
             if (!config) return null;
             return (
@@ -85,6 +106,22 @@ export function LoginForm() {
               </button>
             );
           })}
+
+          {providers && providers.length === 0 && (
+            <div className="space-y-4">
+              <div className="rounded-md bg-amber-50 p-3 text-center text-sm text-amber-700">
+                לא הוגדרו ספקי התחברות. הגדר GOOGLE_CLIENT_ID, MICROSOFT_CLIENT_ID או FACEBOOK_CLIENT_ID ב-.env
+              </div>
+              <button
+                onClick={handleDevLogin}
+                disabled={devLoading}
+                className="flex w-full items-center justify-center gap-3 rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+              >
+                <span className="text-lg">🧪</span>
+                <span>{devLoading ? "מתחבר..." : "התחבר בסביבת פיתוח"}</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {error && (
