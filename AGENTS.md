@@ -16,7 +16,7 @@ CardWise is an open-source personal finance tool that:
 ```
 Browser (React SPA, Hebrew RTL)
     │
-    ├── /api/auth/*         → Auth (bcrypt password, sessions)
+    ├── /api/auth/*         → OAuth (Google, Microsoft, Facebook via Passport.js)
     ├── /api/scrape         → Scraper (israeli-bank-scrapers → Isracard)
     ├── /api/transactions/* → CRUD + AI categorization
     ├── /api/analytics/*    → Trends, categories, merchants, card comparison
@@ -33,7 +33,8 @@ Express Backend (Node.js + TypeScript)
 | File | Purpose |
 |---|---|
 | `backend/src/app.ts` | Express app entry point |
-| `backend/src/routes/auth.ts` | Login/logout/status endpoints |
+| `backend/src/routes/auth.ts` | OAuth login/logout/status + provider callbacks |
+| `backend/src/auth/passport.ts` | Passport.js strategies (Google, Microsoft, Facebook) |
 | `backend/src/routes/scrape.ts` | Trigger Isracard scrape |
 | `backend/src/routes/transactions.ts` | Transaction CRUD + category update + AI categorize |
 | `backend/src/routes/analytics.ts` | Trends, category breakdown, merchants, card comparison |
@@ -43,7 +44,7 @@ Express Backend (Node.js + TypeScript)
 | `backend/src/services/categorization.service.ts` | Azure OpenAI transaction categorization |
 | `backend/src/services/analytics.service.ts` | Aggregation queries for trends/breakdowns |
 | `backend/src/services/insights.service.ts` | AI tip generation with caching |
-| `backend/src/prisma/schema.prisma` | Database schema (Card, Transaction, Category, ScrapeLog, InsightCache) |
+| `backend/src/prisma/schema.prisma` | Database schema (User, Account, Card, Transaction, Category, ScrapeLog, InsightCache) |
 | `backend/src/prisma/seed.ts` | Seeds 16 Hebrew categories |
 | `frontend/src/App.tsx` | Router + auth gate |
 | `frontend/src/components/layout/*` | AppShell, Sidebar, LoginForm |
@@ -79,7 +80,10 @@ Express Backend (Node.js + TypeScript)
 
 ## Key Constraints
 
-- **Credentials**: Never stored, logged, or persisted. In-memory only during scrape.
+- **Multi-user**: All data queries MUST include `userId` filter. Use `(req as any).userId` in routes.
+- **OAuth**: Authentication via Google, Microsoft, Facebook. No password login. Test-only endpoint at POST `/api/auth/test-login` (dev mode).
+- **Data isolation**: Each user sees only their own cards, transactions, analytics, and insights. Categories with `userId=null` are system defaults shared by all users.
+- **Credentials**: Isracard credentials never stored, logged, or persisted. In-memory only during scrape.
 - **Hebrew**: All user-facing strings in Hebrew. Code in English.
 - **RTL**: Frontend is `dir="rtl"`. Test RTL layout in Playwright.
 - **AI costs**: Categorization and insights responses are cached. Batch transactions for categorization (20 per API call).

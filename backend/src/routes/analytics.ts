@@ -7,6 +7,7 @@ analyticsRouter.get("/trends", async (req: Request, res: Response) => {
   try {
     const { cardId, months = "12" } = req.query;
     const trends = await analyticsService.getMonthlyTrends(
+      (req as any).userId,
       cardId as string | undefined,
       Number(months)
     );
@@ -21,6 +22,7 @@ analyticsRouter.get("/categories", async (req: Request, res: Response) => {
   try {
     const { cardId, startDate, endDate } = req.query;
     const breakdown = await analyticsService.getCategoryBreakdown(
+      (req as any).userId,
       cardId as string | undefined,
       startDate ? new Date(startDate as string) : undefined,
       endDate ? new Date(endDate as string) : undefined
@@ -36,6 +38,7 @@ analyticsRouter.get("/merchants", async (req: Request, res: Response) => {
   try {
     const { cardId, limit = "10", startDate, endDate } = req.query;
     const merchants = await analyticsService.getTopMerchants(
+      (req as any).userId,
       cardId as string | undefined,
       Number(limit),
       startDate ? new Date(startDate as string) : undefined,
@@ -52,6 +55,7 @@ analyticsRouter.get("/comparison", async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
     const comparison = await analyticsService.getCardComparison(
+      (req as any).userId,
       startDate ? new Date(startDate as string) : undefined,
       endDate ? new Date(endDate as string) : undefined
     );

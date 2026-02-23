@@ -9,8 +9,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  displayName String    @map("display_name")
+  avatarUrl   String?   @map("avatar_url")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  accounts    Account[]
+  cards       Card[]
+  transactions Transaction[]
+  scrapeLogs  ScrapeLog[]
+  insightCache InsightCache[]
+  categories  Category[]  @relation("UserCategories")
+
+  @@map("users")
+}
+
+model Account {
+  id          String  @id @default(uuid())
+  userId      String  @map("user_id")
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider    String  // "google" | "microsoft" | "facebook"
+  providerId  String  @map("provider_id")
+  accessToken String? @map("access_token")
+  refreshToken String? @map("refresh_token")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([provider, providerId])
+  @@map("accounts")
+}
+
 model Card {
   id             String        @id @default(uuid())
+  userId         String        @map("user_id")
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   lastFourDigits String        @map("last_four_digits")
   cardName       String?       @map("card_name")
   provider       String        @default("isracard")
@@ -18,11 +51,14 @@ model Card {
   transactions   Transaction[]
   scrapeHistory  ScrapeLog[]
 
+  @@index([userId])
   @@map("cards")
 }
 
 model Transaction {
   id               String    @id @default(uuid())
+  userId           String    @map("user_id")
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   cardId           String    @map("card_id")
   card             Card      @relation(fields: [cardId], references: [id])
   date             DateTime
@@ -41,6 +77,7 @@ model Transaction {
   scraperTxnId     String?   @unique @map("scraper_txn_id")
   createdAt        DateTime  @default(now()) @map("created_at")
 
+  @@index([userId])
   @@index([cardId, date])
   @@index([categoryId])
   @@map("transactions")
@@ -48,17 +85,22 @@ model Transaction {
 
 model Category {
   id           String        @id @default(uuid())
-  name         String        @unique
+  name         String
   icon         String?
   color        String?
   isDefault    Boolean       @default(false) @map("is_default")
+  userId       String?       @map("user_id")
+  user         User?         @relation("UserCategories", fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
+  @@unique([name, userId])
   @@map("categories")
 }
 
 model ScrapeLog {
   id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   cardId       String   @map("card_id")
   card         Card     @relation(fields: [cardId], references: [id])
   status       String
@@ -68,11 +110,14 @@ model ScrapeLog {
   errorMessage String?  @map("error_message")
   createdAt    DateTime @default(now()) @map("created_at")
 
+  @@index([userId])
   @@map("scrape_logs")
 }
 
 model InsightCache {
   id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String
   cardScope String   @map("card_scope")
   period    String
@@ -80,6 +125,7 @@ model InsightCache {
   createdAt DateTime @default(now()) @map("created_at")
   expiresAt DateTime @map("expires_at")
 
-  @@unique([type, cardScope, period])
+  @@unique([userId, type, cardScope, period])
+  @@index([userId])
   @@map("insight_cache")
 }

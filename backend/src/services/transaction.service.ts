@@ -11,7 +11,7 @@ export interface StoreResult {
 }
 
 class TransactionService {
-  async storeTransactions(accounts: ScrapeAccount[]): Promise<StoreResult> {
+  async storeTransactions(accounts: ScrapeAccount[], userId: string): Promise<StoreResult> {
     let totalTransactions = 0;
     let newTransactions = 0;
     let duplicateSkipped = 0;
@@ -27,6 +27,7 @@ class TransactionService {
           id: lastFour,
           lastFourDigits: lastFour,
           provider: "isracard",
+          userId,
         },
       });
       cardIds.add(card.id);
@@ -67,6 +68,7 @@ class TransactionService {
             installmentTotal: txn.installments?.total ?? null,
             memo: txn.memo ?? null,
             scraperTxnId,
+            userId,
           },
         });
         newTransactions++;
@@ -78,6 +80,7 @@ class TransactionService {
           cardId: card.id,
           status: "success",
           txnCount: account.txns.length,
+          userId,
           startDate: new Date(
             Math.min(...account.txns.map((t) => new Date(t.date).getTime()))
           ),

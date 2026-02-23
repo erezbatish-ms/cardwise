@@ -35,6 +35,7 @@ export interface CardComparisonItem {
 
 class AnalyticsService {
   async getMonthlyTrends(
+    userId: string,
     cardId?: string,
     months: number = 12
   ): Promise<MonthlyTrend[]> {
@@ -42,6 +43,7 @@ class AnalyticsService {
     startDate.setMonth(startDate.getMonth() - months);
 
     const where: Prisma.TransactionWhereInput = {
+      userId,
       date: { gte: startDate },
       ...(cardId ? { cardId } : {}),
     };
@@ -68,11 +70,13 @@ class AnalyticsService {
   }
 
   async getCategoryBreakdown(
+    userId: string,
     cardId?: string,
     startDate?: Date,
     endDate?: Date
   ): Promise<CategoryBreakdown[]> {
     const where: Prisma.TransactionWhereInput = {
+      userId,
       ...(cardId ? { cardId } : {}),
       ...(startDate || endDate
         ? {
@@ -117,12 +121,14 @@ class AnalyticsService {
   }
 
   async getTopMerchants(
+    userId: string,
     cardId?: string,
     limit: number = 10,
     startDate?: Date,
     endDate?: Date
   ): Promise<MerchantSummary[]> {
     const where: Prisma.TransactionWhereInput = {
+      userId,
       merchant: { not: null },
       ...(cardId ? { cardId } : {}),
       ...(startDate || endDate
@@ -152,6 +158,7 @@ class AnalyticsService {
   }
 
   async getCardComparison(
+    userId: string,
     startDate?: Date,
     endDate?: Date
   ): Promise<CardComparisonItem[]> {
@@ -165,9 +172,10 @@ class AnalyticsService {
       : {};
 
     const cards = await prisma.card.findMany({
+      where: { userId },
       include: {
         transactions: {
-          where: dateFilter,
+          where: { userId, ...dateFilter },
           select: { chargedAmount: true },
         },
       },

@@ -27,26 +27,13 @@ async function fetchApi<T>(
 }
 
 export const api = {
-  // Auth — login bypasses fetchApi to avoid 401 redirect
-  login: async (password: string): Promise<{ success: boolean }> => {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    if (res.status === 401) {
-      return { success: false };
-    }
-    if (!res.ok) {
-      throw new Error("שגיאת שרת");
-    }
-    return res.json();
-  },
+  // Auth — OAuth redirect-based login
+  authStatus: () =>
+    fetchApi<{ authenticated: boolean; user?: AuthUser }>("/auth/status"),
+  authProviders: () =>
+    fetchApi<{ providers: string[] }>("/auth/providers"),
   logout: () =>
     fetchApi<{ success: boolean }>("/auth/logout", { method: "POST" }),
-  authStatus: () =>
-    fetchApi<{ authenticated: boolean }>("/auth/status"),
 
   // Scrape
   scrape: (id: string, card6Digits: string, password: string, startDate?: string) =>
@@ -135,6 +122,13 @@ export interface Card {
   lastFourDigits: string;
   cardName: string | null;
   provider: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
 }
 
 export interface Transaction {

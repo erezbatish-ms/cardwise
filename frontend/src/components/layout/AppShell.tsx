@@ -67,11 +67,11 @@ function Dashboard() {
 }
 
 export function AppShell() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar onLogout={logout} />
+      <Sidebar onLogout={logout} user={user} />
       <main className="flex-1 p-6">
         <Routes>
           <Route path="/" element={<Dashboard />} />

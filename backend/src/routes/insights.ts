@@ -8,6 +8,7 @@ insightsRouter.get("/", async (req: Request, res: Response) => {
   try {
     const { cardId, period } = req.query;
     const insights = await insightsService.getInsights(
+      (req as any).userId,
       cardId as string | undefined,
       period as string | undefined
     );
@@ -22,6 +23,7 @@ insightsRouter.post("/refresh", aiRateLimit, async (req: Request, res: Response)
   try {
     const { cardId, period } = req.body;
     const insights = await insightsService.generateInsights(
+      (req as any).userId,
       cardId as string | undefined,
       period as string | undefined
     );

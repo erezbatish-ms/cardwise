@@ -17,6 +17,7 @@ transactionsRouter.get("/", async (req: Request, res: Response) => {
     } = req.query;
 
     const where: Record<string, unknown> = {};
+    where.userId = (req as any).userId;
 
     if (cardId) where.cardId = cardId as string;
     if (categoryId) where.categoryId = categoryId as string;
@@ -65,7 +66,7 @@ transactionsRouter.put("/:id/category", async (req: Request, res: Response) => {
 
     // Update the single transaction
     const updated = await prisma.transaction.update({
-      where: { id },
+      where: { id, userId: (req as any).userId },
       data: {
         categoryId,
         categorySource: "manual",
@@ -80,6 +81,7 @@ transactionsRouter.put("/:id/category", async (req: Request, res: Response) => {
         where: {
           merchant: updated.merchant,
           id: { not: id },
+          userId: (req as any).userId,
         },
         data: {
           categoryId,
@@ -103,6 +105,7 @@ transactionsRouter.post("/categorize", async (req: Request, res: Response) => {
     );
     const uncategorized = await prisma.transaction.findMany({
       where: {
+        userId: (req as any).userId,
         OR: [
           { categoryId: null },
           { categorySource: "ai" },

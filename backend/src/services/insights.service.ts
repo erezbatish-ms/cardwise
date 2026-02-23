@@ -44,7 +44,7 @@ class InsightsService {
     return process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o-mini";
   }
 
-  async getInsights(cardId?: string, period?: string): Promise<Insight[]> {
+  async getInsights(userId: string, cardId?: string, period?: string): Promise<Insight[]> {
     const cardScope = cardId || "all";
     const currentPeriod =
       period ||
@@ -53,7 +53,8 @@ class InsightsService {
     // Check cache
     const cached = await prisma.insightCache.findUnique({
       where: {
-        type_cardScope_period: {
+        userId_type_cardScope_period: {
+          userId,
           type: "monthly_tips",
           cardScope,
           period: currentPeriod,
@@ -65,10 +66,11 @@ class InsightsService {
       return JSON.parse(cached.content);
     }
 
-    return this.generateInsights(cardId, period);
+    return this.generateInsights(userId, cardId, period);
   }
 
   async generateInsights(
+    userId: string,
     cardId?: string,
     period?: string
   ): Promise<Insight[]> {
@@ -79,9 +81,9 @@ class InsightsService {
 
     // Gather analytics data for context
     const [trends, categories, merchants] = await Promise.all([
-      analyticsService.getMonthlyTrends(cardId, 6),
-      analyticsService.getCategoryBreakdown(cardId),
-      analyticsService.getTopMerchants(cardId, 5),
+      analyticsService.getMonthlyTrends(userId, cardId, 6),
+      analyticsService.getCategoryBreakdown(userId, cardId),
+      analyticsService.getTopMerchants(userId, cardId, 5),
     ]);
 
     const prompt = `אתה יועץ פיננסי אישי. נתח את נתוני ההוצאות הבאים ותן טיפים מעשיים לחיסכון.
@@ -135,7 +137,8 @@ ${merchants.map((m) => `${m.merchant}: ${m.total.toFixed(0)} ₪ (${m.count} ע�
 
       await prisma.insightCache.upsert({
         where: {
-          type_cardScope_period: {
+          userId_type_cardScope_period: {
+            userId,
             type: "monthly_tips",
             cardScope,
             period: currentPeriod,
@@ -148,6 +151,7 @@ ${merchants.map((m) => `${m.merchant}: ${m.total.toFixed(0)} ₪ (${m.count} ע�
           period: currentPeriod,
           content: JSON.stringify(insights),
           expiresAt,
+          userId,
         },
       });
 

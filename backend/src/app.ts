@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import session from "express-session";
 import rateLimit from "express-rate-limit";
+import { configurePassport } from "./auth/passport.js";
 import { authRouter } from "./routes/auth.js";
 import { scrapeRouter } from "./routes/scrape.js";
 import { transactionsRouter } from "./routes/transactions.js";
@@ -48,6 +49,11 @@ app.use(
     },
   })
 );
+
+// Passport OAuth
+const passportInstance = configurePassport();
+app.use(passportInstance.initialize());
+app.use(passportInstance.session());
 
 // Public routes
 app.use("/api/auth", authRouter);

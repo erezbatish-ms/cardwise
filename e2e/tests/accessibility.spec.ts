@@ -26,8 +26,8 @@ test.describe("נגישות — Accessibility & RTL", () => {
 
   test("should have proper form labels on login page", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByLabel("סיסמה")).toBeVisible();
-    await expect(page.getByRole("button", { name: "התחבר" })).toBeVisible();
+    await expect(page.getByText("התחבר באמצעות")).toBeVisible();
+    await expect(page.getByText("CardWise")).toBeVisible();
   });
 
   test("should have proper form labels on scrape page", async ({ page }) => {
@@ -48,11 +48,8 @@ test.describe("נגישות — Accessibility & RTL", () => {
     expect(count).toBeGreaterThanOrEqual(3);
   });
 
-  test("should have alert role on error messages", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByLabel("סיסמה").fill("wrong");
-    await page.getByRole("button", { name: "התחבר" }).click();
-    // Wait for error to appear
+  test("should show error parameter on login page", async ({ page }) => {
+    await page.goto("/login?error=google_failed");
     const alert = page.getByRole("alert");
     await expect(alert).toBeVisible({ timeout: 5000 });
   });

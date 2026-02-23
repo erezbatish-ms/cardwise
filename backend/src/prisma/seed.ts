@@ -26,16 +26,19 @@ async function seed() {
   console.log("Seeding default Hebrew categories...");
 
   for (const cat of DEFAULT_CATEGORIES) {
-    await prisma.category.upsert({
-      where: { name: cat.name },
-      update: {},
-      create: {
-        name: cat.name,
-        icon: cat.icon,
-        color: cat.color,
-        isDefault: true,
-      },
+    const existing = await prisma.category.findFirst({
+      where: { name: cat.name, userId: null },
     });
+    if (!existing) {
+      await prisma.category.create({
+        data: {
+          name: cat.name,
+          icon: cat.icon,
+          color: cat.color,
+          isDefault: true,
+        },
+      });
+    }
   }
 
   console.log(`Seeded ${DEFAULT_CATEGORIES.length} categories`);

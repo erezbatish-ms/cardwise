@@ -6,20 +6,20 @@ test.describe("אימות — Authentication", () => {
     await page.goto("/");
     await expect(page).toHaveURL("/login");
     await expect(page.getByText("CardWise")).toBeVisible();
-    await expect(page.getByLabel("סיסמה")).toBeVisible();
+    await expect(page.getByText("התחבר באמצעות")).toBeVisible();
   });
 
-  test("should login with correct password", async ({ page }) => {
+  test("should login via test endpoint and see dashboard", async ({ page }) => {
     await login(page);
     await expect(page).toHaveURL("/");
     await expect(page.getByRole("heading", { name: "לוח בקרה" })).toBeVisible();
   });
 
-  test("should show error for wrong password", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByLabel("סיסמה").fill("wrong-password");
-    await page.getByRole("button", { name: "התחבר" }).click();
-    await expect(page.getByRole("alert")).toContainText("סיסמה שגויה");
+  test("should show user info in sidebar after login", async ({ page }) => {
+    await login(page);
+    // User display name is shown in sidebar (either "Legacy User" or "Test User")
+    const sidebar = page.locator("aside");
+    await expect(sidebar.getByText(/@cardwise\.local/)).toBeVisible();
   });
 
   test("should logout successfully", async ({ page }) => {
@@ -29,7 +29,6 @@ test.describe("אימות — Authentication", () => {
   });
 
   test("should redirect to login after session expires", async ({ page }) => {
-    // Access protected route without session
     await page.goto("/transactions");
     await expect(page).toHaveURL("/login");
   });

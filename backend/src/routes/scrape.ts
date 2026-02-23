@@ -39,7 +39,7 @@ scrapeRouter.post("/", async (req: Request, res: Response) => {
     });
 
     if (result.success) {
-      const stored = await transactionService.storeTransactions(result.accounts);
+      const stored = await transactionService.storeTransactions(result.accounts, (req as any).userId);
       res.json({
         status: "success",
         message: `נסרקו ${stored.totalTransactions} עסקאות מ-${stored.cardCount} כרטיסים`,

@@ -1,7 +1,9 @@
 import { NavLink } from "react-router-dom";
+import type { AuthUser } from "../../lib/api";
 
 interface SidebarProps {
   onLogout: () => void;
+  user: AuthUser | null;
 }
 
 const navItems = [
@@ -10,12 +12,33 @@ const navItems = [
   { to: "/scrape", label: "סריקת נתונים", icon: "🔄" },
 ];
 
-export function Sidebar({ onLogout }: SidebarProps) {
+export function Sidebar({ onLogout, user }: SidebarProps) {
   return (
     <aside className="flex w-64 flex-col border-l border-gray-200 bg-white">
       <div className="border-b border-gray-200 p-4">
         <h1 className="text-xl font-bold text-blue-600">💳 CardWise</h1>
       </div>
+
+      {user && (
+        <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
+          {user.avatarUrl ? (
+            <img
+              src={user.avatarUrl}
+              alt={user.displayName}
+              className="h-8 w-8 rounded-full"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-700">
+              {user.displayName.charAt(0)}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-medium text-gray-900">{user.displayName}</div>
+            <div className="truncate text-xs text-gray-500">{user.email}</div>
+          </div>
+        </div>
+      )}
 
       <nav className="flex-1 space-y-1 p-4">
         {navItems.map((item) => (

@@ -4,9 +4,10 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 export const cardsRouter = Router();
 
-cardsRouter.get("/", async (_req: Request, res: Response) => {
+cardsRouter.get("/", async (req: Request, res: Response) => {
   try {
     const cards = await prisma.card.findMany({
+      where: { userId: (req as any).userId },
       orderBy: { createdAt: "desc" },
       include: { _count: { select: { transactions: true } } },
     });
@@ -23,7 +24,7 @@ cardsRouter.put("/:id", async (req: Request, res: Response) => {
     const { cardName } = req.body;
 
     const updated = await prisma.card.update({
-      where: { id },
+      where: { id, userId: (req as any).userId },
       data: { cardName },
     });
     res.json(updated);
