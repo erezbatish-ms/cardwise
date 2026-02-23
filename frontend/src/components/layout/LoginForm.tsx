@@ -47,6 +47,9 @@ export function LoginForm() {
         google_failed: "ההתחברות עם Google נכשלה. ודא שהספק הוגדר בשרת.",
         microsoft_failed: "ההתחברות עם Microsoft נכשלה. ודא שהספק הוגדר בשרת.",
         facebook_failed: "ההתחברות עם Facebook נכשלה. ודא שהספק הוגדר בשרת.",
+        google_not_configured: "ספק Google לא הוגדר בשרת. הגדר GOOGLE_CLIENT_ID ו-GOOGLE_CLIENT_SECRET.",
+        microsoft_not_configured: "ספק Microsoft לא הוגדר בשרת. הגדר MICROSOFT_CLIENT_ID ו-MICROSOFT_CLIENT_SECRET.",
+        facebook_not_configured: "ספק Facebook לא הוגדר בשרת. הגדר FACEBOOK_CLIENT_ID ו-FACEBOOK_CLIENT_SECRET.",
       };
       setError(messages[errorParam] || "שגיאה בהתחברות. נסה שוב.");
     }
