@@ -16,7 +16,7 @@
     "prisma:seed": "tsx src/prisma/seed.ts"
   },
   "dependencies": {
-    "@azure/identity": "^4.13.0",
+    "@azure/identity": "^4.13.1",
     "@prisma/client": "^6.4.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
@@ -25,7 +25,7 @@
     "express-rate-limit": "^7.4.0",
     "express-session": "^1.18.0",
     "helmet": "^8.0.0",
-    "israeli-bank-scrapers": "^6.7.1",
+    "israeli-bank-scrapers": "^6.7.4",
     "openai": "^4.73.0",
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
